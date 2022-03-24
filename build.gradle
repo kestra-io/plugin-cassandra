@@ -67,6 +67,8 @@ testlogger {
 }
 
 dependencies {
+    implementation group: 'com.datastax.oss', name: 'java-driver-core', version: '4.4.0'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
     testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
