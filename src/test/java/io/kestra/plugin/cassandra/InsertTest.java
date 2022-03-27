@@ -7,9 +7,6 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
-import java.util.Map;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -18,7 +15,6 @@ class InsertTest {
     @Inject
     private RunContextFactory runContextFactory;
 
-    @SuppressWarnings("unchecked")
     @Test
     void run() throws Exception {
         RunContext runContext = runContextFactory.of(ImmutableMap.of());
@@ -27,7 +23,7 @@ class InsertTest {
             .session(CassandraDbSession.builder()
                 .host("localhost")
                 .build())
-            .cqlQuery("CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', 'datacenter1' : 3 };")
+            .cql("CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', 'datacenter1' : 3 };")
             .build();
 
         Query.Output queryOutput = query.run(runContext);
@@ -37,7 +33,7 @@ class InsertTest {
             .session(CassandraDbSession.builder()
                 .host("localhost")
                 .build())
-            .cqlQuery("CREATE TABLE IF NOT EXISTS test.test (id text, name text, PRIMARY KEY (id, name));")
+            .cql("CREATE TABLE IF NOT EXISTS test.test (id text, name text, PRIMARY KEY (id, name));")
             .build();
 
         queryOutput = query.run(runContext);
@@ -48,7 +44,7 @@ class InsertTest {
             .session(CassandraDbSession.builder()
                 .host("localhost")
                 .build())
-            .cqlQuery("INSERT INTO test.test(id, name) VALUES ('1', 'Dusan');")
+            .cql("INSERT INTO test.test(id, name) VALUES ('1', 'Dusan');")
             .build();
 
         queryOutput = query.run(runContext);
