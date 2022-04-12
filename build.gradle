@@ -22,7 +22,7 @@ repositories {
 
 sourceCompatibility = 11
 group "io.kestra.plugin"
-description 'Plugin template for Kestra'
+description 'Cassandra plugin for Kestra'
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
@@ -67,6 +67,8 @@ testlogger {
 }
 
 dependencies {
+    implementation group: 'com.datastax.oss', name: 'java-driver-core', version: '4.4.0'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
     testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
@@ -102,7 +104,7 @@ jar {
     manifest {
         attributes(
                 "X-Kestra-Title": project.name,
-                "X-Kestra-Group": project.group + ".templates",
+                "X-Kestra-Group": project.group + ".cassandra",
                 "X-Kestra-Description": project.description,
                 "X-Kestra-Version": project.version
         )
