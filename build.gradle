@@ -45,8 +45,7 @@ dependencies {
     // kestra
     compileOnly group: "io.kestra", name: "core", version: kestraVersion
 
-    // libs included in the final jar
-    api group: 'com.google.code.gson', name: 'gson', version: '2.9.0'
+    api group: 'com.datastax.oss', name: 'java-driver-core', version: '4.14.0'
 }
 
 
@@ -67,8 +66,6 @@ testlogger {
 }
 
 dependencies {
-    implementation group: 'com.datastax.oss', name: 'java-driver-core', version: '4.4.0'
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
     testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
