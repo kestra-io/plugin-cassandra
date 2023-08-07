@@ -28,7 +28,7 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 @Introspected
 public class CassandraDbSession {
     @Schema(
-        title = "Adds contact points to use for the initial connection to the cluster."
+        title = "List of contact endpoints to use for the initial connection to the cluster."
     )
     @PluginProperty(dynamic = true)
     private List<Endpoint> endpoints;
@@ -105,7 +105,7 @@ public class CassandraDbSession {
     @Builder
     public static class Endpoint {
         @Schema(
-            title = "The hostname of cassandra server"
+            title = "The hostname of the Cassandra server"
         )
         @PluginProperty(dynamic = true)
         @NotNull
@@ -113,16 +113,16 @@ public class CassandraDbSession {
         String hostname;
 
         @Schema(
-            title = "The port of cassandra server"
+            title = "The port of th Cassandra server"
         )
-        @PluginProperty(dynamic = false)
+        @PluginProperty
         @NotNull
         @NotEmpty
         @Builder.Default
         private Integer port = 9042;
 
         @Schema(
-            title = "the SNI server name",
+            title = "The SNI server name",
             description = "In the context of Cloud, this is the string representation of the host id."
         )
         @PluginProperty(dynamic = true)
