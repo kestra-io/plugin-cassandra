@@ -50,7 +50,7 @@ public class AstraDbSession {
 
     CqlSession connect(RunContext runContext) throws IllegalVariableEvaluationException {
         if ((secureBundle != null && proxyAddress != null) || (secureBundle == null && proxyAddress == null)) {
-            throw new IllegalArgumentException("Please use one of secureBundle or proxyAddress");
+            throw new IllegalArgumentException("Please use only one of secureBundle or proxyAddress");
         }
 
         var builder = CqlSession.builder()
@@ -81,7 +81,7 @@ public class AstraDbSession {
         private String hostname;
 
         @Schema(
-            title = "The port of th Astra DB server"
+            title = "The port of the Astra DB server"
         )
         @PluginProperty
         @NotNull

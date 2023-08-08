@@ -51,5 +51,4 @@ public class Query extends AbstractQuery {
     protected CqlSession cqlSession(RunContext runContext) throws IllegalVariableEvaluationException {
         return this.session.connect(runContext);
     }
-
 }

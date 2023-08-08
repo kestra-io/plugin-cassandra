@@ -113,7 +113,7 @@ public class CassandraDbSession {
         String hostname;
 
         @Schema(
-            title = "The port of th Cassandra server"
+            title = "The port of the Cassandra server"
         )
         @PluginProperty
         @NotNull
