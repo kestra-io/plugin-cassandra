@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
 @Plugin(
         examples = {
                 @Example(
-                        title = "Wait for a sql query to return results and iterate through rows",
+                        title = "Wait for a CQL query to return results and iterate through rows",
                         full = true,
                         code = {
                                 "id: cassandra-trigger",
