@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Query an Astra DB database with CQL."
+    title = "Query an Astra DB with CQL."
 )
 @Plugin(
     examples = {
@@ -48,7 +48,7 @@ public class Query extends AbstractQuery {
     protected AstraDbSession session;
 
     @Override
-    protected CqlSession cqlSession(RunContext runContext) throws IllegalVariableEvaluationException {
+    public CqlSession cqlSession(RunContext runContext) throws IllegalVariableEvaluationException {
         return this.session.connect(runContext);
     }
 }

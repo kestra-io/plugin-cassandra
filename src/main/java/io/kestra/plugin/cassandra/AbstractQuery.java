@@ -110,8 +110,6 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
         }
     }
 
-    protected abstract CqlSession cqlSession(RunContext runContext) throws IllegalVariableEvaluationException;
-
     private Map<String, Object> convertRow(Row row, ColumnDefinitions columnDefinitions) {
         Map<String, Object> map = new LinkedHashMap<>();
 

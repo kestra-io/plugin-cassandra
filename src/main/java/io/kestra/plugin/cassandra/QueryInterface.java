@@ -1,6 +1,9 @@
 package io.kestra.plugin.cassandra;
 
+import com.datastax.oss.driver.api.core.CqlSession;
+import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.validation.constraints.NotNull;
@@ -30,4 +33,6 @@ public interface QueryInterface {
     )
     @PluginProperty
     boolean isFetchOne();
+
+    CqlSession cqlSession(RunContext runContext) throws IllegalVariableEvaluationException;
 }
