@@ -1,0 +1,19 @@
+id: cassandra-listen
+namespace: io.kestra.tests
+
+triggers:
+  - id: watch
+    type: io.kestra.plugin.cassandra.Trigger
+    cql: "select * from test.test_table"
+    session:
+      endpoints:
+        - hostname: localhost
+          port: 9042
+      localDatacenter: datacenter1
+    interval: PT30S
+    fetch: true
+
+tasks:
+  - id: end
+    type: io.kestra.core.tasks.debugs.Return
+    format: "{{task.id}} > {{taskrun.startDate}}"

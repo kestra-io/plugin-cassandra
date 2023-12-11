@@ -44,7 +44,8 @@ public class Query extends AbstractQuery {
     protected CassandraDbSession session;
 
 
-    protected CqlSession cqlSession(RunContext runContext) throws IllegalVariableEvaluationException {
+    @Override
+    public CqlSession cqlSession(RunContext runContext) throws IllegalVariableEvaluationException {
         return this.session.connect(runContext);
     }
 }
