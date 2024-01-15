@@ -40,13 +40,13 @@ public class CassandraDbSession {
     private String localDatacenter;
 
     @Schema(
-        title = "Plaintext authentication username"
+        title = "Plaintext authentication username."
     )
     @PluginProperty(dynamic = true)
     private String username;
 
     @Schema(
-        title = "Plaintext authentication password"
+        title = "Plaintext authentication password."
     )
     @PluginProperty(dynamic = true)
     private String password;
@@ -105,7 +105,7 @@ public class CassandraDbSession {
     @Builder
     public static class Endpoint {
         @Schema(
-            title = "The hostname of the Cassandra server"
+            title = "The hostname of the Cassandra server."
         )
         @PluginProperty(dynamic = true)
         @NotNull
@@ -113,7 +113,7 @@ public class CassandraDbSession {
         String hostname;
 
         @Schema(
-            title = "The port of the Cassandra server"
+            title = "The port of the Cassandra server."
         )
         @PluginProperty
         @NotNull
@@ -122,8 +122,8 @@ public class CassandraDbSession {
         private Integer port = 9042;
 
         @Schema(
-            title = "The SNI server name",
-            description = "In the context of Cloud, this is the string representation of the host id."
+            title = "The SNI server name.",
+            description = "In the context of Cloud, this is the string representation of the host ID."
         )
         @PluginProperty(dynamic = true)
         String serverName;

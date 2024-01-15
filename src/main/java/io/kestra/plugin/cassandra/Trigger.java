@@ -21,38 +21,39 @@ import javax.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-        title = "Wait for a query to return results on a Cassandra database."
+    title = "Wait for a query to return results on a Cassandra database."
 )
 @Plugin(
-        examples = {
-                @Example(
-                        title = "Wait for a CQL query to return results and iterate through rows",
-                        full = true,
-                        code = {
-                                "id: cassandra-trigger",
-                                "namespace: io.kestra.tests",
-                                "tasks:",
-                                "  - id: each",
-                                "    type: io.kestra.core.tasks.flows.EachSequential",
-                                "    tasks:",
-                                "      - id: return",
-                                "        type: io.kestra.core.tasks.debugs.Return",
-                                "        format: \"{{json(taskrun.value)}}\"",
-                                "    value: \"{{ trigger.rows }}\"",
-                                "",
-                                "triggers:",
-                                "  - id: watch",
-                                "    type: io.kestra.plugin.cassandra.Trigger",
-                                "    interval: \"PT5M\"",
-                                "    session:",
-                                "       endpoints:",
-                                "          - hostname: localhost",
-                                "       username: cassandra_user",
-                                "       password: cassandra_passwd",
-                                "    cql: \"SELECT * FROM CQL_KEYSPACE.CQL_TABLE\"",
-                        }
-                )
-        }
+    examples = {
+        @Example(
+            title = "Wait for a CQL query to return results, and then iterate through rows.",
+            full = true,
+            code = {
+                "id: cassandra-trigger",
+                "namespace: io.kestra.tests",
+                "tasks:",
+                "  - id: each",
+                "    type: io.kestra.core.tasks.flows.EachSequential",
+                "    tasks:",
+                "      - id: return",
+                "        type: io.kestra.core.tasks.debugs.Return",
+                "        format: \"{{ json(taskrun.value) }}\"",
+                "    value: \"{{ trigger.rows }}\"",
+                "",
+                "triggers:",
+                "  - id: watch",
+                "    type: io.kestra.plugin.cassandra.Trigger",
+                "    interval: \"PT5M\"",
+                "    session:",
+                "       endpoints:",
+                "          - hostname: localhost",
+                "       username: cassandra_user",
+                "       password: cassandra_passwd",
+                "    cql: \"SELECT * FROM CQL_KEYSPACE.CQL_TABLE\"",
+                "    fetch: true",
+            }
+        )
+    }
 )
 public class Trigger extends AbstractCQLTrigger implements QueryInterface {
 

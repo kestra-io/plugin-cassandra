@@ -10,26 +10,26 @@ import javax.validation.constraints.NotNull;
 
 public interface QueryInterface {
     @Schema(
-        title = "CQL query to execute"
+        title = "CQL query to execute."
     )
     @PluginProperty(dynamic = true)
     @NotNull
     String getCql();
 
     @Schema(
-        title = "Whether to Fetch the data from the query result to the task output"
+        title = "Whether to fetch the data from the query result to the task output."
     )
     @PluginProperty
     boolean isFetch();
 
     @Schema(
-        title = "Whether to store the data from the query result into an ion serialized data file"
+        title = "Whether to store the data from the query result into an ion serialized data file."
     )
     @PluginProperty
     boolean isStore();
 
     @Schema(
-        title = "Whether to Fetch only one data row from the query result to the task output"
+        title = "Whether to fetch only one data row from the query result to the task output."
     )
     @PluginProperty
     boolean isFetchOne();

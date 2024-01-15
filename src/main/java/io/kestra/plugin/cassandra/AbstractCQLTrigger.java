@@ -33,7 +33,7 @@ public abstract class AbstractCQLTrigger extends AbstractTrigger implements Poll
     private String timeZoneId;
 
     @Schema(
-        title = "CQL query"
+        title = "CQL query."
     )
     @PluginProperty
     @NotNull
