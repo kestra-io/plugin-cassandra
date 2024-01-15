@@ -23,15 +23,15 @@ import javax.validation.constraints.NotNull;
 @Introspected
 public class AstraDbSession {
     @Schema(
-        title = "The Astra DB secure bundle, base64 encoded",
-        description = "It must be the ZIP archive containing the secure bundle encoded in base64. Use it only if not using the proxy address."
+        title = "The Astra DB secure bundle, base64 encoded.",
+        description = "It must be the ZIP archive containing the secure bundle encoded in base64. Use it only when you are not using the proxy address."
     )
     @PluginProperty(dynamic = true)
     private String secureBundle;
 
     @Schema(
-        title = "The Astra DB proxy address",
-        description = " Use it only if not using the secure bundle."
+        title = "The Astra DB proxy address.",
+        description = " Use it only when you are not using the secure bundle."
     )
     @PluginProperty
     private ProxyAddress proxyAddress;
@@ -73,7 +73,7 @@ public class AstraDbSession {
     @Builder
     public static class ProxyAddress {
         @Schema(
-            title = "The hostname of the Astra DB server"
+            title = "The hostname of the Astra DB server."
         )
         @PluginProperty(dynamic = true)
         @NotNull
@@ -81,7 +81,7 @@ public class AstraDbSession {
         private String hostname;
 
         @Schema(
-            title = "The port of the Astra DB server"
+            title = "The port of the Astra DB server."
         )
         @PluginProperty
         @NotNull

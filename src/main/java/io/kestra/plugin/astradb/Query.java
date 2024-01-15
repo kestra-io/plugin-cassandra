@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
 @Plugin(
     examples = {
         @Example(
-            title = "Send a CQL query to an Astra DB database",
+            title = "Send a CQL query to an Astra DB.",
             code = {
                 "session:",
                 "  secureBundle: /path/to/secureBundle.zip",
@@ -35,13 +35,14 @@ import javax.validation.constraints.NotNull;
                 "  clientId: astradb_clientId",
                 "  clientSecret: astradb_clientSecret",
                 "cql: SELECT * FROM CQL_TABLE",
+                "fetch: true",
             }
         ),
     }
 )
 public class Query extends AbstractQuery {
     @Schema(
-        title = "The session connection properties"
+        title = "The session connection properties."
     )
     @PluginProperty
     @NotNull

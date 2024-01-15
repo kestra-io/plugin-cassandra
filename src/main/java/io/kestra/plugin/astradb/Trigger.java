@@ -23,38 +23,39 @@ import javax.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-        title = "Wait for a query to return results on AstraDB."
+    title = "Wait for a query to return results on Astra DB."
 )
 @Plugin(
-        examples = {
-                @Example(
-                        title = "Wait for a cql query to return results and iterate through rows",
-                        full = true,
-                        code = {
-                                "id: astra-trigger",
-                                "namespace: io.kestra.tests",
-                                "tasks:",
-                                "  - id: each",
-                                "    type: io.kestra.core.tasks.flows.EachSequential",
-                                "    tasks:",
-                                "      - id: return",
-                                "        type: io.kestra.core.tasks.debugs.Return",
-                                "        format: \"{{json(taskrun.value)}}\"",
-                                "    value: \"{{ trigger.rows }}\"",
-                                "",
-                                "triggers:",
-                                "  - id: watch",
-                                "    type: io.kestra.plugin.astradb.Trigger",
-                                "    interval: \"PT5M\"",
-                                "    session:",
-                                "        secureBundle: /path/to/secureBundle.zip",
-                                "        keyspace: astradb_keyspace",
-                                "        clientId: astradb_clientId",
-                                "        clientSecret: astradb_clientSecret",
-                                "    cql: \"SELECT * FROM CQL_KEYSPACE.CQL_TABLE\"",
-                        }
-                )
-        }
+    examples = {
+        @Example(
+            title = "Wait for a CQL query to return results, and then iterate through rows.",
+            full = true,
+            code = {
+                "id: astra-trigger",
+                "namespace: io.kestra.tests",
+                "tasks:",
+                "  - id: each",
+                "    type: io.kestra.core.tasks.flows.EachSequential",
+                "    tasks:",
+                "      - id: return",
+                "        type: io.kestra.core.tasks.debugs.Return",
+                "        format: \"{{ json(taskrun.value) }}\"",
+                "    value: \"{{ trigger.rows }}\"",
+                "",
+                "triggers:",
+                "  - id: watch",
+                "    type: io.kestra.plugin.astradb.Trigger",
+                "    interval: \"PT5M\"",
+                "    session:",
+                "        secureBundle: /path/to/secureBundle.zip",
+                "        keyspace: astradb_keyspace",
+                "        clientId: astradb_clientId",
+                "        clientSecret: astradb_clientSecret",
+                "    cql: \"SELECT * FROM CQL_KEYSPACE.CQL_TABLE\"",
+                "    fetch: true",
+            }
+        )
+    }
 )
 public class Trigger extends AbstractCQLTrigger implements QueryInterface {
 
@@ -73,7 +74,7 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
     }
 
     @Schema(
-            title = "The session connection properties"
+            title = "The session connection properties."
     )
     @PluginProperty
     @NotNull

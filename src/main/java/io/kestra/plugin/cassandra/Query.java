@@ -23,7 +23,7 @@ import javax.validation.constraints.NotNull;
 @Plugin(
     examples = {
         @Example(
-            title = "Send a cql query to a Cassandra database",
+            title = "Send a CQL query to a Cassandra database.",
             code = {
                 "session:",
                 "  endpoints:",
@@ -31,13 +31,14 @@ import javax.validation.constraints.NotNull;
                 "  username: cassandra_user",
                 "  password: cassandra_passwd",
                 "cql: SELECT * FROM CQL_KEYSPACE.CQL_TABLE",
+                "fetch: true",
             }
         ),
     }
 )
 public class Query extends AbstractQuery {
     @Schema(
-        title = "The session connection properties"
+        title = "The session connection properties."
     )
     @PluginProperty
     @NotNull
