@@ -7,7 +7,6 @@ import com.datastax.oss.driver.internal.core.metadata.SniEndPoint;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.runners.RunContext;
-import io.micronaut.core.annotation.Introspected;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,7 +24,6 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 @SuperBuilder
 @NoArgsConstructor
 @Getter
-@Introspected
 public class CassandraDbSession {
     @Schema(
         title = "List of contact endpoints to use for the initial connection to the cluster."
