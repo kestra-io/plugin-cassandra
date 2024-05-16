@@ -85,7 +85,7 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
                 fileWriter.close();
 
                 outputBuilder
-                    .uri(runContext.putTempFile(tempFile))
+                    .uri(runContext.storage().putFile(tempFile))
                     .size(count.get());
             } else if (this.fetch) {
                 List<Map<String, Object>> maps = new ArrayList<>();
