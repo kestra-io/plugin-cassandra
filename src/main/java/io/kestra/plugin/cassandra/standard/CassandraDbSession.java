@@ -16,6 +16,13 @@ import lombok.experimental.SuperBuilder;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import java.io.FileInputStream;
+import java.security.KeyStore;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -58,6 +65,30 @@ public class CassandraDbSession {
     @PluginProperty(dynamic = true)
     private String applicationName;
 
+    @Schema(
+    title = "Path to the truststore file. (.crt)"
+    )
+    @PluginProperty(dynamic = true)
+    private String truststorePath;
+
+    @Schema(
+    title = "Password for the truststore file."
+    )
+    @PluginProperty(dynamic = true)
+    private String truststorePassword;
+
+    @Schema(
+        title = "Path to the keystore file. (*.jks)"
+    )
+    @PluginProperty(dynamic = true)
+    private String keystorePath;
+
+    @Schema(
+        title = "Password for the keystore file."
+    )
+    @PluginProperty(dynamic = true)
+    private String keystorePassword;
+
     CqlSession connect(RunContext runContext) throws IllegalVariableEvaluationException {
         CqlSessionBuilder cqlSessionBuilder = CqlSession.builder()
             .addContactEndPoints(this.endpoints
@@ -95,7 +126,42 @@ public class CassandraDbSession {
         if (this.applicationName != null) {
             cqlSessionBuilder.withApplicationName(runContext.render(this.applicationName));
         }
+        if (
+            this.truststorePath != null && this.keystorePath != null 
+        ) {
+            try {
+                KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
+                try (FileInputStream truststoreFis = new FileInputStream(runContext.render(this.truststorePath))) {
+                    if(this.truststorePassword != null) {
+                        truststore.load(truststoreFis, runContext.render(this.truststorePassword).toCharArray());
+                    }else{
+                        truststore.load(truststoreFis, null);
+                    }
+                }
 
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(truststore);
+
+                KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+                try (FileInputStream keystoreFis = new FileInputStream(runContext.render(this.keystorePath))) {
+                    if(this.keystorePassword != null){
+                        keystore.load(keystoreFis, runContext.render(this.keystorePassword).toCharArray());
+                    }else{
+                        keystore.load(keystoreFis, null);
+                    }
+                }
+
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                kmf.init(keystore, runContext.render(this.keystorePassword).toCharArray());
+
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+                cqlSessionBuilder.withSslContext(sslContext);
+            } catch (Exception e) {
+                throw new IllegalVariableEvaluationException("Failed to configure SSL", e);
+            }
+        }
         return cqlSessionBuilder.build();
     }
 
