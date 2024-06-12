@@ -10,8 +10,7 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.runners.Worker;
 import io.kestra.core.schedulers.AbstractScheduler;
-import io.kestra.core.schedulers.DefaultScheduler;
-import io.kestra.core.schedulers.SchedulerTriggerStateInterface;
+import io.kestra.jdbc.runner.JdbcScheduler;
 import io.micronaut.context.ApplicationContext;
 import io.kestra.core.junit.annotations.KestraTest;
 import jakarta.inject.Inject;
@@ -29,7 +28,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 
 @KestraTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -51,9 +49,6 @@ public class TriggerTest {
     protected ApplicationContext applicationContext;
 
     @Inject
-    protected SchedulerTriggerStateInterface triggerState;
-
-    @Inject
     protected FlowListeners flowListenersService;
 
     @Inject
@@ -70,10 +65,9 @@ public class TriggerTest {
         // scheduler
         Worker worker = new Worker(applicationContext, 8, null);
         try (
-                AbstractScheduler scheduler = new DefaultScheduler(
+                AbstractScheduler scheduler = new JdbcScheduler(
                         this.applicationContext,
-                        this.flowListenersService,
-                        this.triggerState
+                        this.flowListenersService
                 );
         ) {
             AtomicReference<Execution> last = new AtomicReference<>();
