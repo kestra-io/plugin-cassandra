@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Longs;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
-import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import io.kestra.core.junit.annotations.KestraTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
-@MicronautTest
+@KestraTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class QueryTest {
     @Inject
