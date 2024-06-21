@@ -71,7 +71,7 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
                     .row(convertRow(rs.one(), columnDefinitions))
                     .size(1L);
             } else if (this.store) {
-                File tempFile = runContext.tempFile(".ion").toFile();
+                File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
                 BufferedWriter fileWriter = new BufferedWriter(new FileWriter(tempFile));
                 AtomicLong count = new AtomicLong();
                 try (OutputStream outputStream = new FileOutputStream(tempFile)) {
