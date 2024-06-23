@@ -10,6 +10,7 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.runners.Worker;
 import io.kestra.core.schedulers.AbstractScheduler;
+import io.kestra.core.utils.IdUtils;
 import io.kestra.core.utils.TestsUtils;
 import io.kestra.jdbc.runner.JdbcScheduler;
 import io.micronaut.context.ApplicationContext;
@@ -64,27 +65,28 @@ public class TriggerTest {
         CountDownLatch queueCount = new CountDownLatch(1);
 
         // scheduler
-        Worker worker = new Worker(applicationContext, 8, null);
-        try (
-                AbstractScheduler scheduler = new JdbcScheduler(
+        try (Worker worker = applicationContext.createBean(Worker.class, IdUtils.create(), 8, null)) {
+            try (
+                    AbstractScheduler scheduler = new JdbcScheduler(
                         this.applicationContext,
                         this.flowListenersService
-                );
-        ) {
-            // wait for execution
-            Flux<Execution> receive = TestsUtils.receive(executionQueue, execution -> {
-                queueCount.countDown();
-                assertThat(execution.getLeft().getFlowId(), is(flow));
-            });
+                    );
+            ) {
+                // wait for execution
+                Flux<Execution> receive = TestsUtils.receive(executionQueue, execution -> {
+                    queueCount.countDown();
+                    assertThat(execution.getLeft().getFlowId(), is(flow));
+                });
 
-            worker.run();
-            scheduler.run();
-            repositoryLoader.load(Objects.requireNonNull(classLoader.getResource(flowRepository)));
+                worker.run();
+                scheduler.run();
+                repositoryLoader.load(Objects.requireNonNull(classLoader.getResource(flowRepository)));
 
-            boolean await = queueCount.await(1, TimeUnit.MINUTES);
-            assertThat(await, is(true));
+                boolean await = queueCount.await(1, TimeUnit.MINUTES);
+                assertThat(await, is(true));
 
-            return receive.blockLast();
+                return receive.blockLast();
+            }
         }
     }
 
