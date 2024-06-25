@@ -1,4 +1,4 @@
-package io.kestra.plugin.cassandra;
+package io.kestra.plugin.cassandra.standard;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Longs;
@@ -23,7 +23,6 @@ import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

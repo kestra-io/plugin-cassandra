@@ -1,4 +1,4 @@
-package io.kestra.plugin.astradb;
+package io.kestra.plugin.cassandra.astradb;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
@@ -38,7 +38,8 @@ import jakarta.validation.constraints.NotNull;
                 "fetch: true",
             }
         ),
-    }
+    },
+    aliases = "io.kestra.plugin.astradb.Query"
 )
 public class Query extends AbstractQuery {
     @Schema(

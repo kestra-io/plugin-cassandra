@@ -1,4 +1,4 @@
-package io.kestra.plugin.cassandra;
+package io.kestra.plugin.cassandra.standard;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;

@@ -3,6 +3,6 @@
         "Apache Cassandra is an open source NoSQL distributed database trusted by thousands of companies for scalability and high availability without compromising performance.",
     categories = PluginSubGroup.PluginCategory.DATABASE
 )
-package io.kestra.plugin.cassandra;
+package io.kestra.plugin.cassandra.standard;
 
 import io.kestra.core.models.annotations.PluginSubGroup;
