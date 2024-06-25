@@ -1,4 +1,4 @@
-package io.kestra.plugin.cassandra;
+package io.kestra.plugin.cassandra.standard;
 
 import com.google.common.collect.ImmutableMap;
 import io.kestra.core.models.executions.Execution;

@@ -1,9 +1,6 @@
-package io.kestra.plugin.cassandra;
+package io.kestra.plugin.cassandra.standard;
 
-import com.google.common.collect.ImmutableMap;
 import io.kestra.core.runners.RunContext;
-import io.kestra.core.runners.RunContextFactory;
-import io.kestra.core.utils.IdUtils;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package io.kestra.plugin.astradb;
+package io.kestra.plugin.cassandra.astradb;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
@@ -7,7 +7,7 @@ import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.cassandra.*;
-import io.kestra.plugin.cassandra.Query;
+import io.kestra.plugin.cassandra.astradb.Query;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -55,13 +55,14 @@ import jakarta.validation.constraints.NotNull;
                 "    fetch: true",
             }
         )
-    }
+    },
+    aliases = "io.kestra.plugin.astradb.Trigger"
 )
 public class Trigger extends AbstractCQLTrigger implements QueryInterface {
 
     @Override
     protected AbstractQuery.Output runQuery(RunContext runContext) throws Exception {
-        var query = io.kestra.plugin.astradb.Query.builder()
+        var query = io.kestra.plugin.cassandra.astradb.Query.builder()
                 .id(this.id)
                 .type(Query.class.getName())
                 .session(this.getSession())
