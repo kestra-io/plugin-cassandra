@@ -45,7 +45,7 @@ import jakarta.validation.constraints.NotNull;
                 "",
                 "triggers:",
                 "  - id: watch",
-                "    type: io.kestra.plugin.cassandra.Trigger",
+                "    type: io.kestra.plugin.cassandra.standard.Trigger",
                 "    interval: \"PT5M\"",
                 "    session:",
                 "       endpoints:",

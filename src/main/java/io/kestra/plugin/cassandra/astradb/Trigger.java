@@ -44,7 +44,7 @@ import jakarta.validation.constraints.NotNull;
                 "",
                 "triggers:",
                 "  - id: watch",
-                "    type: io.kestra.plugin.astradb.Trigger",
+                "    type: io.kestra.plugin.cassandra.astradb.Trigger",
                 "    interval: \"PT5M\"",
                 "    session:",
                 "        secureBundle: /path/to/secureBundle.zip",
