@@ -83,7 +83,6 @@ public class AstraDbSession {
         )
         @PluginProperty
         @NotNull
-        @NotEmpty
         @Builder.Default
         private Integer port = 9042;
     }
