@@ -32,7 +32,7 @@ import jakarta.validation.constraints.NotNull;
             title = "Wait for a CQL query to return results, and then iterate through rows.",
             full = true,
             code = {
-                "id: cassandra-trigger",
+                "id: cassandra_trigger",
                 "namespace: io.kestra.tests",
                 "tasks:",
                 "  - id: each",
