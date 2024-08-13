@@ -22,6 +22,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -72,21 +74,15 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
                     .size(1L);
             } else if (this.store) {
                 File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
-                BufferedWriter fileWriter = new BufferedWriter(new FileWriter(tempFile));
-                AtomicLong count = new AtomicLong();
-                try (OutputStream outputStream = new FileOutputStream(tempFile)) {
-                    rs.forEach(throwConsumer(row -> {
-                        count.getAndIncrement();
-                        FileSerde.write(outputStream, convertRow(row, columnDefinitions));
-                    }));
+                try (var output = new BufferedWriter(new FileWriter(tempFile), FileSerde.BUFFER_SIZE)) {
+                    Mono<Long> longMono = FileSerde.writeAll(output,
+                        Flux.fromIterable(rs).map(row -> convertRow(row, columnDefinitions))
+                    );
+
+                    outputBuilder
+                        .uri(runContext.storage().putFile(tempFile))
+                        .size(longMono.block());
                 }
-
-                fileWriter.flush();
-                fileWriter.close();
-
-                outputBuilder
-                    .uri(runContext.storage().putFile(tempFile))
-                    .size(count.get());
             } else if (this.fetch) {
                 List<Map<String, Object>> maps = new ArrayList<>();
                 rs.forEach(row -> maps.add(convertRow(row, columnDefinitions)));
