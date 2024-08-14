@@ -75,13 +75,13 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
             } else if (this.store) {
                 File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
                 try (var output = new BufferedWriter(new FileWriter(tempFile), FileSerde.BUFFER_SIZE)) {
-                    Mono<Long> longMono = FileSerde.writeAll(output,
+                    Long count = FileSerde.writeAll(output,
                         Flux.fromIterable(rs).map(row -> convertRow(row, columnDefinitions))
-                    );
+                    ).block();
 
                     outputBuilder
                         .uri(runContext.storage().putFile(tempFile))
-                        .size(longMono.block());
+                        .size(count);
                 }
             } else if (this.fetch) {
                 List<Map<String, Object>> maps = new ArrayList<>();
