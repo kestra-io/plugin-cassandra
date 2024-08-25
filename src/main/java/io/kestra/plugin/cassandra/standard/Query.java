@@ -25,20 +25,27 @@ import jakarta.validation.constraints.NotNull;
     examples = {
         @Example(
             title = "Send a CQL query to a Cassandra database.",
-            code = {
-                "session:",
-                "  endpoints:",
-                "    - hostname: localhost",
-                "  secureConnection:",
-                "     truststorePath: path to .crt file",
-                "     truststorePassword: truststore_password",
-                "     keystorePath: path to .jks file",
-                "     keystorePassword: keystore_password",
-                "  username: cassandra_user",
-                "  password: cassandra_passwd",
-                "cql: SELECT * FROM CQL_KEYSPACE.CQL_TABLE",
-                "fetch: true",
-            }
+            full = true,
+            code = """
+                id: cassandra_standard_query
+                namespace: company.team
+
+                tasks:
+                  - id: query
+                    type: io.kestra.plugin.cassandra.standard.Query
+                    session:
+                      endpoints:
+                        - hostname: localhost
+                      secureConnection:
+                        truststorePath: path to .crt file
+                        truststorePassword: truststore_password
+                        keystorePath: path to .jks file
+                        keystorePassword: keystore_password
+                      username: cassandra_user
+                      password: cassandra_passwd
+                    cql: SELECT * FROM CQL_KEYSPACE.CQL_TABLE
+                    fetch: true
+                """
         ),
     },
     aliases = "io.kestra.plugin.cassandra.Query"
