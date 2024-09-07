@@ -28,15 +28,22 @@ import jakarta.validation.constraints.NotNull;
     examples = {
         @Example(
             title = "Send a CQL query to an Astra DB.",
-            code = {
-                "session:",
-                "  secureBundle: /path/to/secureBundle.zip",
-                "  keyspace: astradb_keyspace",
-                "  clientId: astradb_clientId",
-                "  clientSecret: astradb_clientSecret",
-                "cql: SELECT * FROM CQL_TABLE",
-                "fetch: true",
-            }
+            full = true,
+            code = """
+                id: cassandra_astradb_query
+                namespace: company.team
+
+                tasks:
+                  - id: query
+                    type: io.kestra.plugin.cassandra.astradb.Query
+                    session:
+                      secureBundle: /path/to/secureBundle.zip
+                      keyspace: astradb_keyspace
+                      clientId: astradb_clientId
+                      clientSecret: astradb_clientSecret
+                    cql: SELECT * FROM CQL_TABLE
+                    fetch: true                
+                """
         ),
     },
     aliases = "io.kestra.plugin.astradb.Query"

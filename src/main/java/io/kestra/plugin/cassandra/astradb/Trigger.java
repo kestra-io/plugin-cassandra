@@ -30,30 +30,31 @@ import jakarta.validation.constraints.NotNull;
         @Example(
             title = "Wait for a CQL query to return results, and then iterate through rows.",
             full = true,
-            code = {
-                "id: astra_trigger",
-                "namespace: io.kestra.tests",
-                "tasks:",
-                "  - id: each",
-                "    type: io.kestra.core.tasks.flows.EachSequential",
-                "    tasks:",
-                "      - id: return",
-                "        type: io.kestra.core.tasks.debugs.Return",
-                "        format: \"{{ json(taskrun.value) }}\"",
-                "    value: \"{{ trigger.rows }}\"",
-                "",
-                "triggers:",
-                "  - id: watch",
-                "    type: io.kestra.plugin.cassandra.astradb.Trigger",
-                "    interval: \"PT5M\"",
-                "    session:",
-                "        secureBundle: /path/to/secureBundle.zip",
-                "        keyspace: astradb_keyspace",
-                "        clientId: astradb_clientId",
-                "        clientSecret: astradb_clientSecret",
-                "    cql: \"SELECT * FROM CQL_KEYSPACE.CQL_TABLE\"",
-                "    fetch: true",
-            }
+            code = """
+                id: astra_trigger
+                namespace: company.team
+
+                tasks:
+                  - id: each
+                    type: io.kestra.core.tasks.flows.EachSequential
+                    tasks:
+                      - id: return
+                        type: io.kestra.core.tasks.debugs.Return
+                        format: "{{ json(taskrun.value) }}"
+                    value: "{{ trigger.rows }}"
+                
+                triggers:
+                  - id: watch
+                    type: io.kestra.plugin.cassandra.astradb.Trigger
+                    interval: "PT5M"
+                    session:
+                        secureBundle: /path/to/secureBundle.zip
+                        keyspace: astradb_keyspace
+                        clientId: astradb_clientId
+                        clientSecret: astradb_clientSecret
+                    cql: "SELECT * FROM CQL_KEYSPACE.CQL_TABLE"
+                    fetch: true
+                """
         )
     },
     aliases = "io.kestra.plugin.astradb.Trigger"
