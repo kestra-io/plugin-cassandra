@@ -37,12 +37,12 @@ import jakarta.validation.constraints.NotNull;
                 
                 tasks:
                   - id: each
-                    type: io.kestra.core.tasks.flows.EachSequential
+                    type: io.kestra.core.tasks.flows.ForEach
+                    values: "{{ trigger.rows }}"
                     tasks:
                       - id: return
                         type: io.kestra.core.tasks.debugs.Return
                         format: "{{ json(taskrun.value) }}"
-                    value: "{{ trigger.rows }}"
                 
                 triggers:
                   - id: watch
