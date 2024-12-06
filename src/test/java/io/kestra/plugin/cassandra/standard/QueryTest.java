@@ -2,6 +2,7 @@ package io.kestra.plugin.cassandra.standard;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Longs;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.junit.annotations.KestraTest;
@@ -44,10 +45,10 @@ class QueryTest {
         Query query = Query.builder()
             .session(CassandraDbSession.builder()
                 .endpoints(List.of(CassandraDbSession.Endpoint.builder().hostname("localhost").build()))
-                .localDatacenter("datacenter1")
+                .localDatacenter(Property.of("datacenter1"))
                 .build())
-            .cql("SELECT * FROM test.test_table;")
-            .fetchOne(true)
+            .cql(Property.of("SELECT * FROM test.test_table;"))
+            .fetchOne(Property.of(true))
             .build();
         Query.Output queryOutput = query.run(runContext);
 

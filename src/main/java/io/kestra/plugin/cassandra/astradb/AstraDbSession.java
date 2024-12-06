@@ -3,6 +3,7 @@ package io.kestra.plugin.cassandra.astradb;
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -24,8 +25,7 @@ public class AstraDbSession {
         title = "The Astra DB secure bundle, base64 encoded.",
         description = "It must be the ZIP archive containing the secure bundle encoded in base64. Use it only when you are not using the proxy address."
     )
-    @PluginProperty(dynamic = true)
-    private String secureBundle;
+    private Property<String> secureBundle;
 
     @Schema(
         title = "The Astra DB proxy address.",
@@ -34,17 +34,14 @@ public class AstraDbSession {
     @PluginProperty
     private ProxyAddress proxyAddress;
 
-    @PluginProperty(dynamic = true)
     @NotNull
-    private String keyspace;
+    private Property<String> keyspace;
 
-    @PluginProperty(dynamic = true)
     @NotNull
-    private String clientId;
+    private Property<String> clientId;
 
-    @PluginProperty(dynamic = true)
     @NotNull
-    private String clientSecret;
+    private Property<String> clientSecret;
 
     CqlSession connect(RunContext runContext) throws IllegalVariableEvaluationException {
         if ((secureBundle != null && proxyAddress != null) || (secureBundle == null && proxyAddress == null)) {
@@ -52,16 +49,21 @@ public class AstraDbSession {
         }
 
         var builder = CqlSession.builder()
-            .withAuthCredentials(runContext.render(this.clientId),runContext.render(this.clientSecret))
-            .withKeyspace(runContext.render(this.keyspace));
+            .withAuthCredentials(runContext.render(this.clientId).as(String.class).orElseThrow(),
+                runContext.render(this.clientSecret).as(String.class).orElseThrow())
+            .withKeyspace(runContext.render(this.keyspace).as(String.class).orElseThrow());
 
         if (secureBundle != null) {
-            byte[] decoded = Base64.getDecoder().decode(runContext.render(this.secureBundle));
+            byte[] decoded = Base64.getDecoder().decode(runContext.render(this.secureBundle).as(String.class).orElseThrow());
             builder.withCloudSecureConnectBundle(new ByteArrayInputStream(decoded));
         }
 
         if(proxyAddress != null) {
-            builder.withCloudProxyAddress(new InetSocketAddress(this.proxyAddress.hostname, this.proxyAddress.port));
+            builder.withCloudProxyAddress(
+                new InetSocketAddress(
+                    runContext.render(this.proxyAddress.hostname),
+                    runContext.render(this.proxyAddress.port).as(Integer.class).orElseThrow())
+            );
         }
 
         return builder.build();
@@ -81,9 +83,8 @@ public class AstraDbSession {
         @Schema(
             title = "The port of the Astra DB server."
         )
-        @PluginProperty
         @NotNull
         @Builder.Default
-        private Integer port = 9042;
+        private Property<Integer> port = Property.of(9042);
     }
 }
