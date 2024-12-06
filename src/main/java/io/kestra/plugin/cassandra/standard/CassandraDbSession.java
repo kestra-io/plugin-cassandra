@@ -6,6 +6,7 @@ import com.datastax.oss.driver.internal.core.metadata.DefaultEndPoint;
 import com.datastax.oss.driver.internal.core.metadata.SniEndPoint;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -42,20 +43,17 @@ public class CassandraDbSession {
     @Schema(
         title = "Specifies the datacenter that is considered \"local\" by the load balancing policy."
     )
-    @PluginProperty(dynamic = true)
-    private String localDatacenter;
+    private Property<String> localDatacenter;
 
     @Schema(
         title = "Plaintext authentication username."
     )
-    @PluginProperty(dynamic = true)
-    private String username;
+    private Property<String> username;
 
     @Schema(
         title = "Plaintext authentication password."
     )
-    @PluginProperty(dynamic = true)
-    private String password;
+    private Property<String> password;
 
     @Schema(
         title = "The name of the application using the created session.",
@@ -63,8 +61,7 @@ public class CassandraDbSession {
             "new connection established by the driver. Currently, this information is used by Insights monitoring " +
             "(if the target cluster does not support Insights, the entry will be ignored by the server)."
     )
-    @PluginProperty(dynamic = true)
-    private String applicationName;
+    private Property<String> applicationName;
 
     @Schema(title = "Secure connection details.")
     @PluginProperty(dynamic = true)
@@ -77,13 +74,13 @@ public class CassandraDbSession {
                 .map(throwFunction(e -> {
                     InetSocketAddress inetSocketAddress = new InetSocketAddress(
                         runContext.render(e.getHostname()),
-                        e.getPort()
+                        runContext.render(e.getPort()).as(Integer.class).orElseThrow()
                     );
 
                     if (e.getServerName() != null) {
                         return new SniEndPoint(
                             inetSocketAddress,
-                            runContext.render(e.getServerName())
+                            runContext.render(e.getServerName()).as(String.class).orElseThrow()
                         );
                     } else {
                         return new DefaultEndPoint(inetSocketAddress);
@@ -94,24 +91,24 @@ public class CassandraDbSession {
             );
 
         if (this.localDatacenter != null) {
-            cqlSessionBuilder.withLocalDatacenter(runContext.render(this.localDatacenter));
+            cqlSessionBuilder.withLocalDatacenter(runContext.render(this.localDatacenter).as(String.class).orElseThrow());
         }
 
         if (this.username != null && this.password != null) {
             cqlSessionBuilder.withAuthCredentials(
-                runContext.render(this.username),
-                runContext.render(this.password)
+                runContext.render(this.username).as(String.class).orElseThrow(),
+                runContext.render(this.password).as(String.class).orElseThrow()
             );
         }
 
         if (this.applicationName != null) {
-            cqlSessionBuilder.withApplicationName(runContext.render(this.applicationName));
+            cqlSessionBuilder.withApplicationName(runContext.render(this.applicationName).as(String.class).orElseThrow());
         }
-        
+
         if (this.secureConnection != null) {
             this.secureConnection.configure(cqlSessionBuilder, runContext);
         }
-        
+
         return cqlSessionBuilder.build();
     }
 
@@ -129,52 +126,47 @@ public class CassandraDbSession {
         @Schema(
             title = "The port of the Cassandra server."
         )
-        @PluginProperty
         @NotNull
         @Builder.Default
-        private Integer port = 9042;
+        private Property<Integer> port = Property.of(9042);
 
         @Schema(
             title = "The SNI server name.",
             description = "In the context of Cloud, this is the string representation of the host ID."
         )
-        @PluginProperty(dynamic = true)
-        String serverName;
+        Property<String> serverName;
     }
-    
+
     @Getter
     @Builder
     public static class SecureConnection {
         @Schema(
             title = "Path to the truststore file. (.crt)"
         )
-        @PluginProperty(dynamic = true)
-        private String truststorePath;
+        private Property<String> truststorePath;
 
         @Schema(
             title = "Password for the truststore file."
         )
-        @PluginProperty(dynamic = true)
-        private String truststorePassword;
+        private Property<String> truststorePassword;
 
         @Schema(
             title = "Path to the keystore file. (*.jks)"
         )
-        @PluginProperty(dynamic = true)
-        private String keystorePath;
+        private Property<String> keystorePath;
 
         @Schema(
             title = "Password for the keystore file."
         )
-        @PluginProperty(dynamic = true)
-        private String keystorePassword;
-        
+        private Property<String> keystorePassword;
+
         void configure(CqlSessionBuilder builder, RunContext runContext) throws IllegalVariableEvaluationException {
             try {
                 KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
-                try (FileInputStream truststoreFis = new FileInputStream(runContext.render(this.truststorePath))) {
+                try (FileInputStream truststoreFis = new FileInputStream(runContext.render(this.truststorePath).as(String.class).orElseThrow())) {
+
                     if(this.truststorePassword != null) {
-                        truststore.load(truststoreFis, runContext.render(this.truststorePassword).toCharArray());
+                        truststore.load(truststoreFis, runContext.render(this.truststorePassword).as(String.class).orElseThrow().toCharArray());
                     }else{
                         truststore.load(truststoreFis, null);
                     }
@@ -184,16 +176,16 @@ public class CassandraDbSession {
                 tmf.init(truststore);
 
                 KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-                try (FileInputStream keystoreFis = new FileInputStream(runContext.render(this.keystorePath))) {
+                try (FileInputStream keystoreFis = new FileInputStream(runContext.render(this.keystorePath).as(String.class).orElseThrow())) {
                     if(this.keystorePassword != null){
-                        keystore.load(keystoreFis, runContext.render(this.keystorePassword).toCharArray());
+                        keystore.load(keystoreFis, runContext.render(this.keystorePassword).as(String.class).orElseThrow().toCharArray());
                     }else{
                         keystore.load(keystoreFis, null);
                     }
                 }
 
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                kmf.init(keystore, runContext.render(this.keystorePassword).toCharArray());
+                kmf.init(keystore, runContext.render(this.keystorePassword).as(String.class).orElseThrow().toCharArray());
 
                 SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);

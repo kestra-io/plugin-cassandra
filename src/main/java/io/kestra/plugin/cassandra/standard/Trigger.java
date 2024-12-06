@@ -34,7 +34,7 @@ import jakarta.validation.constraints.NotNull;
             code = """
                 id: cassandra_trigger
                 namespace: io.kestra.tests
-                
+
                 tasks:
                   - id: each
                     type: io.kestra.core.tasks.flows.ForEach
@@ -43,7 +43,7 @@ import jakarta.validation.constraints.NotNull;
                       - id: return
                         type: io.kestra.core.tasks.debugs.Return
                         format: "{{ json(taskrun.value) }}"
-                
+
                 triggers:
                   - id: watch
                     type: io.kestra.plugin.cassandra.standard.Trigger
@@ -69,9 +69,9 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
                 .type(Query.class.getName())
                 .session(this.getSession())
                 .cql(this.getCql())
-                .fetch(this.isFetch())
-                .store(this.isStore())
-                .fetchOne(this.isFetchOne())
+                .fetch(this.getFetch())
+                .store(this.getStore())
+                .fetchOne(this.getFetchOne())
                 .build();
         return query.run(runContext);
     }

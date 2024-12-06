@@ -11,6 +11,7 @@ import com.datastax.oss.driver.api.core.data.TupleValue;
 import com.datastax.oss.protocol.internal.ProtocolConstants;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.executions.metrics.Counter;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.models.tasks.Task;
 import io.kestra.core.runners.RunContext;
@@ -50,29 +51,29 @@ import static io.kestra.core.utils.Rethrow.throwConsumer;
 @NoArgsConstructor
 public abstract class AbstractQuery extends Task implements RunnableTask<AbstractQuery.Output>, QueryInterface {
     @Builder.Default
-    private boolean fetch = false;
+    protected Property<Boolean> fetch = Property.of(false);
 
     @Builder.Default
-    private boolean store = false;
+    protected Property<Boolean> store = Property.of(false);
 
     @Builder.Default
-    private boolean fetchOne = false;
+    protected Property<Boolean> fetchOne = Property.of(false);
 
-    protected String cql;
+    protected Property<String> cql;
 
     public AbstractQuery.Output run(RunContext runContext) throws Exception {
         try (CqlSession session = this.cqlSession(runContext)) {
-            ResultSet rs = session.execute(runContext.render(cql));
+            ResultSet rs = session.execute(runContext.render(cql).as(String.class).orElse(null));
             ColumnDefinitions columnDefinitions = rs.getColumnDefinitions();
 
             Output.OutputBuilder outputBuilder = Output.builder()
                 .bytes(rs.getExecutionInfo().getResponseSizeInBytes());
 
-            if (this.fetchOne) {
+            if (runContext.render(this.fetchOne).as(Boolean.class).orElseThrow()) {
                 outputBuilder
                     .row(convertRow(rs.one(), columnDefinitions))
                     .size(1L);
-            } else if (this.store) {
+            } else if (runContext.render(this.store).as(Boolean.class).orElseThrow()) {
                 File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
                 try (var output = new BufferedWriter(new FileWriter(tempFile), FileSerde.BUFFER_SIZE)) {
                     Long count = FileSerde.writeAll(output,
@@ -83,7 +84,7 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
                         .uri(runContext.storage().putFile(tempFile))
                         .size(count);
                 }
-            } else if (this.fetch) {
+            } else if (runContext.render(this.fetch).as(Boolean.class).orElseThrow()) {
                 List<Map<String, Object>> maps = new ArrayList<>();
                 rs.forEach(row -> maps.add(convertRow(row, columnDefinitions)));
 

@@ -3,6 +3,7 @@ package io.kestra.plugin.cassandra;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.conditions.ConditionContext;
 import io.kestra.core.models.executions.Execution;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.triggers.*;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,18 +31,17 @@ public abstract class AbstractCQLTrigger extends AbstractTrigger implements Poll
     @Schema(
         title = "CQL query."
     )
-    @PluginProperty
     @NotNull
-    private String cql;
+    private Property<String> cql;
 
     @Builder.Default
-    private boolean store = false;
+    private Property<Boolean> store = Property.of(false);
 
     @Builder.Default
-    private boolean fetchOne = false;
+    private Property<Boolean> fetchOne = Property.of(false);
 
     @Builder.Default
-    private boolean fetch = false;
+    private Property<Boolean> fetch = Property.of(false);
 
     @Builder.Default
     @Getter(AccessLevel.NONE)
