@@ -4,6 +4,7 @@ import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.conditions.ConditionContext;
 import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.property.Property;
+import io.kestra.core.models.tasks.common.FetchType;
 import io.kestra.core.models.triggers.*;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,14 +35,20 @@ public abstract class AbstractCQLTrigger extends AbstractTrigger implements Poll
     @NotNull
     private Property<String> cql;
 
+    @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
     private Property<Boolean> store = Property.of(false);
 
+    @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
     private Property<Boolean> fetchOne = Property.of(false);
 
+    @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
     private Property<Boolean> fetch = Property.of(false);
+
+    @Builder.Default
+    protected Property<FetchType> fetchType = Property.of(FetchType.NONE);
 
     @Builder.Default
     @Getter(AccessLevel.NONE)

@@ -14,6 +14,7 @@ import io.kestra.core.models.executions.metrics.Counter;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.models.tasks.Task;
+import io.kestra.core.models.tasks.common.FetchType;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.FileSerde;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -50,14 +51,21 @@ import static io.kestra.core.utils.Rethrow.throwConsumer;
 @Getter
 @NoArgsConstructor
 public abstract class AbstractQuery extends Task implements RunnableTask<AbstractQuery.Output>, QueryInterface {
+
+    @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
     protected Property<Boolean> fetch = Property.of(false);
 
+    @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
     protected Property<Boolean> store = Property.of(false);
 
+    @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
     protected Property<Boolean> fetchOne = Property.of(false);
+
+    @Builder.Default
+    protected Property<FetchType> fetchType = Property.of(FetchType.NONE);
 
     protected Property<String> cql;
 
@@ -69,28 +77,34 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
             Output.OutputBuilder outputBuilder = Output.builder()
                 .bytes(rs.getExecutionInfo().getResponseSizeInBytes());
 
-            if (runContext.render(this.fetchOne).as(Boolean.class).orElseThrow()) {
-                outputBuilder
+            FetchType type = computeFetchType(runContext);
+
+            switch (type) {
+                case FETCH_ONE -> outputBuilder
                     .row(convertRow(rs.one(), columnDefinitions))
                     .size(1L);
-            } else if (runContext.render(this.store).as(Boolean.class).orElseThrow()) {
-                File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
-                try (var output = new BufferedWriter(new FileWriter(tempFile), FileSerde.BUFFER_SIZE)) {
-                    Long count = FileSerde.writeAll(output,
-                        Flux.fromIterable(rs).map(row -> convertRow(row, columnDefinitions))
-                    ).block();
+                case STORE -> {
+                    File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
+                    try (var output = new BufferedWriter(new FileWriter(tempFile), FileSerde.BUFFER_SIZE)) {
+                        Long count = FileSerde.writeAll(output,
+                            Flux.fromIterable(rs).map(row -> convertRow(row, columnDefinitions))
+                        ).block();
+
+                        outputBuilder
+                            .uri(runContext.storage().putFile(tempFile))
+                            .size(count);
+                    }
+                }
+                case FETCH -> {
+                    List<Map<String, Object>> maps = new ArrayList<>();
+                    rs.forEach(row -> maps.add(convertRow(row, columnDefinitions)));
 
                     outputBuilder
-                        .uri(runContext.storage().putFile(tempFile))
-                        .size(count);
+                        .rows(maps)
+                        .size((long) maps.size());
                 }
-            } else if (runContext.render(this.fetch).as(Boolean.class).orElseThrow()) {
-                List<Map<String, Object>> maps = new ArrayList<>();
-                rs.forEach(row -> maps.add(convertRow(row, columnDefinitions)));
 
-                outputBuilder
-                    .rows(maps)
-                    .size((long) maps.size());
+                case NONE -> runContext.logger().info("FetchType is NONE");
             }
 
             Output output = outputBuilder.build();
@@ -105,6 +119,22 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
 
             return output;
         }
+    }
+
+    private FetchType computeFetchType(RunContext runContext) throws IllegalVariableEvaluationException {
+        if (Boolean.TRUE.equals(runContext.render(this.getFetchOne()).as(Boolean.class).orElse(false))) {
+            return FetchType.FETCH_ONE;
+        }
+
+        if (Boolean.TRUE.equals(runContext.render(this.getStore()).as(Boolean.class).orElse(false))) {
+            return FetchType.STORE;
+        }
+
+        if (Boolean.TRUE.equals(runContext.render(this.getFetch()).as(Boolean.class).orElse(false))) {
+            return FetchType.FETCH;
+        }
+
+        return runContext.render(this.getFetchType()).as(FetchType.class).orElse(FetchType.NONE);
     }
 
     private Map<String, Object> convertRow(Row row, ColumnDefinitions columnDefinitions) {

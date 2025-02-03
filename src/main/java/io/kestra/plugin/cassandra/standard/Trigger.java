@@ -54,7 +54,7 @@ import jakarta.validation.constraints.NotNull;
                        username: cassandra_user
                        password: cassandra_passwd
                     cql: "SELECT * FROM CQL_KEYSPACE.CQL_TABLE"
-                    fetch: true
+                    fetchType: FETCH
                 """
         )
     },
@@ -65,14 +65,15 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
     @Override
     protected AbstractQuery.Output runQuery(RunContext runContext) throws Exception {
         var query = Query.builder()
-                .id(this.id)
-                .type(Query.class.getName())
-                .session(this.getSession())
-                .cql(this.getCql())
-                .fetch(this.getFetch())
-                .store(this.getStore())
-                .fetchOne(this.getFetchOne())
-                .build();
+            .id(this.id)
+            .type(Query.class.getName())
+            .session(this.getSession())
+            .cql(this.getCql())
+            .fetch(this.getFetch())
+            .store(this.getStore())
+            .fetchOne(this.getFetchOne())
+            .fetchType(this.getFetchType())
+            .build();
         return query.run(runContext);
     }
 
