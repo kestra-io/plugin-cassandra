@@ -40,7 +40,7 @@ import jakarta.validation.constraints.NotNull;
                       clientId: astradb_clientId
                       clientSecret: astradb_clientSecret
                     cql: SELECT * FROM CQL_TABLE
-                    fetch: true
+                    fetchType: FETCH
                 """
         ),
     },

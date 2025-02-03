@@ -44,7 +44,7 @@ import jakarta.validation.constraints.NotNull;
                       username: cassandra_user
                       password: cassandra_passwd
                     cql: SELECT * FROM CQL_KEYSPACE.CQL_TABLE
-                    fetch: true
+                    fetchType: FETCH
                 """
         ),
     },
