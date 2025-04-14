@@ -20,7 +20,7 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Query an Astra DB with CQL."
+    title = "Query Astra DB with CQL."
 )
 @Plugin(
     examples = {

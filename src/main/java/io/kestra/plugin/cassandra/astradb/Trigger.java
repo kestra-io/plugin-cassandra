@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Wait for a query to return results on Astra DB."
+    title = "Trigger a flow on returned results from an Astra DB query."
 )
 @Plugin(
     examples = {
