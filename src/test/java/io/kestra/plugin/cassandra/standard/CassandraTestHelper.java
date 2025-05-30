@@ -15,9 +15,9 @@ public class CassandraTestHelper {
         Query query = Query.builder()
                 .session(CassandraDbSession.builder()
                         .endpoints(List.of(CassandraDbSession.Endpoint.builder().hostname("localhost").build()))
-                        .localDatacenter(Property.of("datacenter1"))
+                        .localDatacenter(Property.ofValue("datacenter1"))
                         .build())
-                .cql(Property.of("CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', 'datacenter1' : 3 };"))
+                .cql(Property.ofValue("CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', 'datacenter1' : 3 };"))
                 .build();
 
         Query.Output queryOutput = query.run(runContext);
@@ -26,9 +26,9 @@ public class CassandraTestHelper {
         query = Query.builder()
                 .session(CassandraDbSession.builder()
                         .endpoints(List.of(CassandraDbSession.Endpoint.builder().hostname("localhost").build()))
-                        .localDatacenter(Property.of("datacenter1"))
+                        .localDatacenter(Property.ofValue("datacenter1"))
                         .build())
-                .cql(Property.of("CREATE TABLE IF NOT EXISTS test.test_table (" +
+                .cql(Property.ofValue("CREATE TABLE IF NOT EXISTS test.test_table (" +
                         "  id text, " +
                         "  name text, " +
                         "  c_ascii ascii, " +
@@ -65,9 +65,9 @@ public class CassandraTestHelper {
         query = Query.builder()
                 .session(CassandraDbSession.builder()
                         .endpoints(List.of(CassandraDbSession.Endpoint.builder().hostname("localhost").build()))
-                        .localDatacenter(Property.of("datacenter1"))
+                        .localDatacenter(Property.ofValue("datacenter1"))
                         .build())
-                .cql(Property.of("SELECT * from test.test_table"))
+                .cql(Property.ofValue("SELECT * from test.test_table"))
                 .build();
         queryOutput = query.run(runContext);
 
@@ -75,9 +75,9 @@ public class CassandraTestHelper {
             query = Query.builder()
                     .session(CassandraDbSession.builder()
                             .endpoints(List.of(CassandraDbSession.Endpoint.builder().hostname("localhost").build()))
-                            .localDatacenter(Property.of("datacenter1"))
+                            .localDatacenter(Property.ofValue("datacenter1"))
                             .build())
-                    .cql(Property.of("INSERT INTO test.test_table" +
+                    .cql(Property.ofValue("INSERT INTO test.test_table" +
                             "(" +
                             "  id, " +
                             "  name, " +
