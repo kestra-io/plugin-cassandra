@@ -128,7 +128,7 @@ public class CassandraDbSession {
         )
         @NotNull
         @Builder.Default
-        private Property<Integer> port = Property.of(9042);
+        private Property<Integer> port = Property.ofValue(9042);
 
         @Schema(
             title = "The SNI server name.",

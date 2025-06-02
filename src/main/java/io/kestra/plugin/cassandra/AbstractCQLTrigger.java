@@ -37,18 +37,18 @@ public abstract class AbstractCQLTrigger extends AbstractTrigger implements Poll
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
-    private Property<Boolean> store = Property.of(false);
+    private Property<Boolean> store = Property.ofValue(false);
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
-    private Property<Boolean> fetchOne = Property.of(false);
+    private Property<Boolean> fetchOne = Property.ofValue(false);
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
-    private Property<Boolean> fetch = Property.of(false);
+    private Property<Boolean> fetch = Property.ofValue(false);
 
     @Builder.Default
-    protected Property<FetchType> fetchType = Property.of(FetchType.NONE);
+    protected Property<FetchType> fetchType = Property.ofValue(FetchType.NONE);
 
     @Builder.Default
     @Getter(AccessLevel.NONE)

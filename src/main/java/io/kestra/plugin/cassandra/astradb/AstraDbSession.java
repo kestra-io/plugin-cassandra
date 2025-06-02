@@ -85,6 +85,6 @@ public class AstraDbSession {
         )
         @NotNull
         @Builder.Default
-        private Property<Integer> port = Property.of(9042);
+        private Property<Integer> port = Property.ofValue(9042);
     }
 }

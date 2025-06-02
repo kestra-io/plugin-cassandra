@@ -54,18 +54,18 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
-    protected Property<Boolean> fetch = Property.of(false);
+    protected Property<Boolean> fetch = Property.ofValue(false);
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
-    protected Property<Boolean> store = Property.of(false);
+    protected Property<Boolean> store = Property.ofValue(false);
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
-    protected Property<Boolean> fetchOne = Property.of(false);
+    protected Property<Boolean> fetchOne = Property.ofValue(false);
 
     @Builder.Default
-    protected Property<FetchType> fetchType = Property.of(FetchType.NONE);
+    protected Property<FetchType> fetchType = Property.ofValue(FetchType.NONE);
 
     protected Property<String> cql;
 

@@ -50,11 +50,11 @@ class QueryTest {
         Query query = Query.builder()
             .session(CassandraDbSession.builder()
                 .endpoints(List.of(CassandraDbSession.Endpoint.builder().hostname("localhost").build()))
-                .localDatacenter(Property.of("datacenter1"))
+                .localDatacenter(Property.ofValue("datacenter1"))
                 .build())
-            .cql(Property.of("SELECT * FROM test.test_table;"))
-            .fetchType(useFetchOne ? null : Property.of(FetchType.FETCH_ONE))
-            .fetchOne(Property.of(useFetchOne))
+            .cql(Property.ofValue("SELECT * FROM test.test_table;"))
+            .fetchType(useFetchOne ? null : Property.ofValue(FetchType.FETCH_ONE))
+            .fetchOne(Property.ofValue(useFetchOne))
             .build();
         Query.Output queryOutput = query.run(runContext);
 
