@@ -10,6 +10,9 @@ import com.datastax.oss.driver.api.core.data.GettableByIndex;
 import com.datastax.oss.driver.api.core.data.TupleValue;
 import com.datastax.oss.protocol.internal.ProtocolConstants;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
+import io.kestra.core.models.annotations.Metric;
+import io.kestra.core.models.annotations.Plugin;
+import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.executions.metrics.Counter;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
@@ -50,6 +53,16 @@ import static io.kestra.core.utils.Rethrow.throwConsumer;
 @EqualsAndHashCode
 @Getter
 @NoArgsConstructor
+@Plugin(
+     metrics = {
+        @Metric(
+            name = "fetch.size",
+            type = Counter.TYPE,
+            unit = "records",
+            description = "The number of rows fetch from the embedding store."
+        )
+    }
+)
 public abstract class AbstractQuery extends Task implements RunnableTask<AbstractQuery.Output>, QueryInterface {
 
     @Deprecated(since = "0.22.0", forRemoval = true)
