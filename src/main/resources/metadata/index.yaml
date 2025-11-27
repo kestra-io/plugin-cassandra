@@ -1,0 +1,8 @@
+group: io.kestra.plugin.cassandra
+name: "cassandra"
+title: "Apache Cassandra"
+description: "Utilize Apache Cassandra in Kestra workflows for data management."
+body: ""
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"
