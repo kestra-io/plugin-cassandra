@@ -1,8 +1,8 @@
 group: io.kestra.plugin.cassandra.astradb
 name: "astradb"
 title: "Astradb"
-description: "This sub-group of plugins contains tasks for using Datastax Astra DB. Astra DB is an almost zero-friction drop-in replacement for self-managed Cassandra - a very good option for developers looking for a serverless NoSQL database."
-body: ""
+description: "Tasks that run CQL queries and triggers on DataStax Astra DB."
+body: "Connect with either a base64-encoded secure connect bundle or a proxy address (use only one), plus keyspace, clientId, and clientSecret to build the Astra session for query and trigger tasks. Ideal for serverless Cassandra workloads that need polling or data retrieval within Kestra while keeping authentication and connectivity consistent."
 videos: []
 createdBy: "Kestra Core Team"
 managedBy: "Kestra Core Team"
