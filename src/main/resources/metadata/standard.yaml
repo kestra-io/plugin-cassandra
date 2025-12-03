@@ -1,8 +1,8 @@
 group: io.kestra.plugin.cassandra.standard
 name: "standard"
 title: "Standard"
-description: "This sub-group of plugins contains tasks for using Apache Cassandra. Apache Cassandra is an open source NoSQL distributed database trusted by thousands of companies for scalability and high availability without compromising performance."
-body: ""
+description: "Tasks that run CQL queries or polling triggers against self-managed Apache Cassandra clusters."
+body: "Use these tasks to execute queries or fire triggers with a Cassandra session built from contact endpoints, optional local datacenter, credentials, and SSL truststore/keystore details. Supports fetch/fetchOne/store output options so downstream steps can consume result rows while reusing the same connection schema across query and trigger tasks."
 videos: []
 createdBy: "Kestra Core Team"
 managedBy: "Kestra Core Team"

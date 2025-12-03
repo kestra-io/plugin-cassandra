@@ -2,7 +2,8 @@ group: io.kestra.plugin.cassandra
 name: "cassandra"
 title: "Apache Cassandra"
 description: "Utilize Apache Cassandra in Kestra workflows for data management."
-body: ""
+description: "Tasks that integrate Apache Cassandra into Kestra workflows for querying and event-driven triggers."
+body: "Provides CQL-based query and trigger tasks for both self-managed Cassandra clusters and Astra DB, allowing flows to fetch data or react when rows appear. Each subgroup requires its own session configuration (endpoints with auth and SSL, or Astra secure bundle/proxy with credentials and keyspace) to establish connections."
 videos: []
 createdBy: "Kestra Core Team"
 managedBy: "Kestra Core Team"
