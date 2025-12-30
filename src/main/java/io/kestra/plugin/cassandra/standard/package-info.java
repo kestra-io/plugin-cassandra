@@ -1,7 +1,10 @@
 @PluginSubGroup(
     description = "This sub-group of plugins contains tasks for using Apache Cassandra.\n" +
         "Apache Cassandra is an open source NoSQL distributed database trusted by thousands of companies for scalability and high availability without compromising performance.",
-    categories = PluginSubGroup.PluginCategory.DATABASE
+    categories = PluginSubGroup.PluginCategory.DATABASE,
+    categories = {
+        PluginSubGroup.PluginCategory.DATA
+    }
 )
 package io.kestra.plugin.cassandra.standard;
 
