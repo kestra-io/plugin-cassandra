@@ -23,7 +23,8 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Trigger a flow on returned results from an Astra DB query."
+    title = "Trigger flow when Astra DB query returns data",
+    description = "Polls Astra DB at a fixed interval (default 60s) and launches a Flow once the CQL query returns at least one row. Use fetchType to control result handling; the NONE default does not fetch rows and the trigger will not fire."
 )
 @Plugin(
     examples = {
@@ -77,7 +78,8 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
     }
 
     @Schema(
-            title = "The session connection properties."
+            title = "Astra DB session configuration",
+            description = "Required connection details (secure bundle or cloud proxy, keyspace, client credentials). Secure bundle and proxy are mutually exclusive; exactly one must be provided."
     )
     @PluginProperty
     @NotNull
