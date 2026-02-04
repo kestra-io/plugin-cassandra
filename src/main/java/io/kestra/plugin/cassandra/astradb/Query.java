@@ -20,7 +20,8 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Query Astra DB with CQL."
+    title = "Run a CQL query on Astra DB",
+    description = "Executes a CQL statement against Astra DB. Use fetchType to control result handling (FETCH, STORE, FETCH_ONE); NONE is the default and only records metrics."
 )
 @Plugin(
     examples = {
@@ -48,7 +49,8 @@ import jakarta.validation.constraints.NotNull;
 )
 public class Query extends AbstractQuery {
     @Schema(
-        title = "The session connection properties."
+        title = "Astra DB session configuration",
+        description = "Connection settings including secure bundle or proxy (choose one), keyspace, and service credentials."
     )
     @PluginProperty
     @NotNull

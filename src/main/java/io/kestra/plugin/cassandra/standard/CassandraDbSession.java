@@ -35,35 +35,37 @@ import static io.kestra.core.utils.Rethrow.throwFunction;
 @Getter
 public class CassandraDbSession {
     @Schema(
-        title = "List of contact endpoints to use for the initial connection to the cluster."
+        title = "Contact endpoints for cluster bootstrap",
+        description = "List of hosts (and optional SNI names) used to open the initial connection. Port defaults to 9042 per endpoint unless overridden."
     )
     @PluginProperty(dynamic = true)
     private List<Endpoint> endpoints;
 
     @Schema(
-        title = "Specifies the datacenter that is considered \"local\" by the load balancing policy."
+        title = "Local datacenter name",
+        description = "Datacenter considered local by the load-balancing policy; recommended for multi-DC clusters."
     )
     private Property<String> localDatacenter;
 
     @Schema(
-        title = "Plaintext authentication username."
+        title = "Plaintext authentication username"
     )
     private Property<String> username;
 
     @Schema(
-        title = "Plaintext authentication password."
+        title = "Plaintext authentication password"
     )
     private Property<String> password;
 
     @Schema(
-        title = "The name of the application using the created session.",
+        title = "Application name sent in startup",
         description = "It will be sent in the STARTUP protocol message, under the key `APPLICATION_NAME`, for each " +
             "new connection established by the driver. Currently, this information is used by Insights monitoring " +
             "(if the target cluster does not support Insights, the entry will be ignored by the server)."
     )
     private Property<String> applicationName;
 
-    @Schema(title = "Secure connection details.")
+    @Schema(title = "Secure connection details")
     @PluginProperty(dynamic = true)
     private SecureConnection secureConnection;
 
@@ -116,7 +118,7 @@ public class CassandraDbSession {
     @Builder
     public static class Endpoint {
         @Schema(
-            title = "The hostname of the Cassandra server."
+            title = "Cassandra hostname"
         )
         @PluginProperty(dynamic = true)
         @NotNull
@@ -124,14 +126,15 @@ public class CassandraDbSession {
         String hostname;
 
         @Schema(
-            title = "The port of the Cassandra server."
+            title = "Cassandra port",
+            description = "Defaults to 9042."
         )
         @NotNull
         @Builder.Default
         private Property<Integer> port = Property.ofValue(9042);
 
         @Schema(
-            title = "The SNI server name.",
+            title = "SNI server name",
             description = "In the context of Cloud, this is the string representation of the host ID."
         )
         Property<String> serverName;
@@ -141,22 +144,22 @@ public class CassandraDbSession {
     @Builder
     public static class SecureConnection {
         @Schema(
-            title = "Path to the truststore file. (.crt)"
+            title = "Path to truststore file (.crt)"
         )
         private Property<String> truststorePath;
 
         @Schema(
-            title = "Password for the truststore file."
+            title = "Password for the truststore file"
         )
         private Property<String> truststorePassword;
 
         @Schema(
-            title = "Path to the keystore file. (*.jks)"
+            title = "Path to keystore file (*.jks)"
         )
         private Property<String> keystorePath;
 
         @Schema(
-            title = "Password for the keystore file."
+            title = "Password for the keystore file"
         )
         private Property<String> keystorePassword;
 
