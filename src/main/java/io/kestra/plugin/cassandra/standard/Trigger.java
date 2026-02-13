@@ -24,7 +24,8 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Trigger a flow on returned results from a Cassandra database query."
+    title = "Trigger flow when Cassandra query returns data",
+    description = "Polls Cassandra at a fixed interval (default 60s) and starts a Flow once the CQL query yields at least one row. Use fetchType to materialize results; the NONE default stores nothing and will not fire the trigger."
 )
 @Plugin(
     examples = {
@@ -78,7 +79,8 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
     }
 
     @Schema(
-        title = "The session connection properties"
+        title = "Cassandra session configuration",
+        description = "Required connection details (endpoints, datacenter, auth, optional TLS) used to open the polling CqlSession."
     )
     @PluginProperty
     @NotNull
@@ -89,5 +91,3 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
         return this.session.connect(runContext);
     }
 }
-
-
