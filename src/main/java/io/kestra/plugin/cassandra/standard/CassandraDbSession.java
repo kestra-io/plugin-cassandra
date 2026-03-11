@@ -1,34 +1,34 @@
 package io.kestra.plugin.cassandra.standard;
 
+import java.io.FileInputStream;
+import java.net.InetSocketAddress;
+import java.security.KeyStore;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.internal.core.metadata.DefaultEndPoint;
 import com.datastax.oss.driver.internal.core.metadata.SniEndPoint;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import java.io.FileInputStream;
-import java.security.KeyStore;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-
 import static io.kestra.core.utils.Rethrow.throwFunction;
-
 
 @SuperBuilder
 @NoArgsConstructor
@@ -71,25 +71,27 @@ public class CassandraDbSession {
 
     CqlSession connect(RunContext runContext) throws IllegalVariableEvaluationException {
         CqlSessionBuilder cqlSessionBuilder = CqlSession.builder()
-            .addContactEndPoints(this.endpoints
-                .stream()
-                .map(throwFunction(e -> {
-                    InetSocketAddress inetSocketAddress = new InetSocketAddress(
-                        runContext.render(e.getHostname()),
-                        runContext.render(e.getPort()).as(Integer.class).orElseThrow()
-                    );
-
-                    if (e.getServerName() != null) {
-                        return new SniEndPoint(
-                            inetSocketAddress,
-                            runContext.render(e.getServerName()).as(String.class).orElseThrow()
+            .addContactEndPoints(
+                this.endpoints
+                    .stream()
+                    .map(throwFunction(e ->
+                    {
+                        InetSocketAddress inetSocketAddress = new InetSocketAddress(
+                            runContext.render(e.getHostname()),
+                            runContext.render(e.getPort()).as(Integer.class).orElseThrow()
                         );
-                    } else {
-                        return new DefaultEndPoint(inetSocketAddress);
-                    }
 
-                }))
-                .collect(Collectors.toList())
+                        if (e.getServerName() != null) {
+                            return new SniEndPoint(
+                                inetSocketAddress,
+                                runContext.render(e.getServerName()).as(String.class).orElseThrow()
+                            );
+                        } else {
+                            return new DefaultEndPoint(inetSocketAddress);
+                        }
+
+                    }))
+                    .collect(Collectors.toList())
             );
 
         if (this.localDatacenter != null) {
@@ -168,9 +170,9 @@ public class CassandraDbSession {
                 KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
                 try (FileInputStream truststoreFis = new FileInputStream(runContext.render(this.truststorePath).as(String.class).orElseThrow())) {
 
-                    if(this.truststorePassword != null) {
+                    if (this.truststorePassword != null) {
                         truststore.load(truststoreFis, runContext.render(this.truststorePassword).as(String.class).orElseThrow().toCharArray());
-                    }else{
+                    } else {
                         truststore.load(truststoreFis, null);
                     }
                 }
@@ -180,9 +182,9 @@ public class CassandraDbSession {
 
                 KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
                 try (FileInputStream keystoreFis = new FileInputStream(runContext.render(this.keystorePath).as(String.class).orElseThrow())) {
-                    if(this.keystorePassword != null){
+                    if (this.keystorePassword != null) {
                         keystore.load(keystoreFis, runContext.render(this.keystorePassword).as(String.class).orElseThrow().toCharArray());
-                    }else{
+                    } else {
                         keystore.load(keystoreFis, null);
                     }
                 }

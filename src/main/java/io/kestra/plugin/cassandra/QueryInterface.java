@@ -1,12 +1,13 @@
 package io.kestra.plugin.cassandra;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.common.FetchType;
 import io.kestra.core.runners.RunContext;
-import io.swagger.v3.oas.annotations.media.Schema;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 public interface QueryInterface {

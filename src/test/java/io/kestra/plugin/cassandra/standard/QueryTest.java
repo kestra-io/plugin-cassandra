@@ -1,20 +1,5 @@
 package io.kestra.plugin.cassandra.standard;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.Longs;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.models.tasks.common.FetchType;
-import io.kestra.core.runners.RunContext;
-import io.kestra.core.runners.RunContextFactory;
-import io.kestra.core.junit.annotations.KestraTest;
-import jakarta.inject.Inject;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -25,6 +10,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.primitives.Longs;
+
+import io.kestra.core.junit.annotations.KestraTest;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.models.tasks.common.FetchType;
+import io.kestra.core.runners.RunContext;
+import io.kestra.core.runners.RunContextFactory;
+
+import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -45,13 +46,15 @@ class QueryTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
+    @ValueSource(booleans = { true, false })
     void run(boolean useFetchOne) throws Exception {
         Query query = Query.builder()
-            .session(CassandraDbSession.builder()
-                .endpoints(List.of(CassandraDbSession.Endpoint.builder().hostname("localhost").build()))
-                .localDatacenter(Property.ofValue("datacenter1"))
-                .build())
+            .session(
+                CassandraDbSession.builder()
+                    .endpoints(List.of(CassandraDbSession.Endpoint.builder().hostname("localhost").build()))
+                    .localDatacenter(Property.ofValue("datacenter1"))
+                    .build()
+            )
             .cql(Property.ofValue("SELECT * FROM test.test_table;"))
             .fetchType(useFetchOne ? null : Property.ofValue(FetchType.FETCH_ONE))
             .fetchOne(Property.ofValue(useFetchOne))

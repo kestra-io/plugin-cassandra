@@ -1,40 +1,8 @@
 package io.kestra.plugin.cassandra;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
-import com.datastax.oss.driver.api.core.cql.ColumnDefinitions;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.api.core.data.CqlDuration;
-import com.datastax.oss.driver.api.core.data.GettableByIndex;
-import com.datastax.oss.driver.api.core.data.TupleValue;
-import com.datastax.oss.protocol.internal.ProtocolConstants;
-import io.kestra.core.exceptions.IllegalVariableEvaluationException;
-import io.kestra.core.models.annotations.Metric;
-import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.annotations.PluginProperty;
-import io.kestra.core.models.executions.metrics.Counter;
-import io.kestra.core.models.property.Property;
-import io.kestra.core.models.tasks.RunnableTask;
-import io.kestra.core.models.tasks.Task;
-import io.kestra.core.models.tasks.common.FetchType;
-import io.kestra.core.runners.RunContext;
-import io.kestra.core.serializers.FileSerde;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -44,9 +12,36 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
-import static io.kestra.core.utils.Rethrow.throwConsumer;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
+import com.datastax.oss.driver.api.core.cql.ColumnDefinitions;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.api.core.data.CqlDuration;
+import com.datastax.oss.driver.api.core.data.GettableByIndex;
+import com.datastax.oss.driver.api.core.data.TupleValue;
+import com.datastax.oss.protocol.internal.ProtocolConstants;
+
+import io.kestra.core.exceptions.IllegalVariableEvaluationException;
+import io.kestra.core.models.annotations.Metric;
+import io.kestra.core.models.annotations.Plugin;
+import io.kestra.core.models.executions.metrics.Counter;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.models.tasks.RunnableTask;
+import io.kestra.core.models.tasks.Task;
+import io.kestra.core.models.tasks.common.FetchType;
+import io.kestra.core.runners.RunContext;
+import io.kestra.core.serializers.FileSerde;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
+import reactor.core.publisher.Flux;
 
 @SuperBuilder
 @ToString
@@ -54,7 +49,7 @@ import static io.kestra.core.utils.Rethrow.throwConsumer;
 @Getter
 @NoArgsConstructor
 @Plugin(
-     metrics = {
+    metrics = {
         @Metric(
             name = "fetch.size",
             type = Counter.TYPE,
@@ -99,7 +94,8 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
                 case STORE -> {
                     File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
                     try (var output = new BufferedWriter(new FileWriter(tempFile), FileSerde.BUFFER_SIZE)) {
-                        Long count = FileSerde.writeAll(output,
+                        Long count = FileSerde.writeAll(
+                            output,
                             Flux.fromIterable(rs).map(row -> convertRow(row, columnDefinitions))
                         ).block();
 
