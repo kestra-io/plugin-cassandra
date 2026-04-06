@@ -27,13 +27,14 @@ public class AstraDbSession {
         title = "Base64-encoded secure connect bundle",
         description = "Supply the ZIP archive content encoded as base64. Use only when not configuring the proxy address."
     )
+    @PluginProperty(group = "advanced")
     private Property<String> secureBundle;
 
     @Schema(
         title = "Astra DB cloud proxy address",
         description = "Use only when the secure bundle is not provided."
     )
-    @PluginProperty
+    @PluginProperty(group = "advanced")
     private ProxyAddress proxyAddress;
 
     @NotNull
@@ -80,7 +81,7 @@ public class AstraDbSession {
         @Schema(
             title = "Hostname of the Astra DB server"
         )
-        @PluginProperty(dynamic = true)
+        @PluginProperty(dynamic = true, group = "main")
         @NotNull
         @NotEmpty
         private String hostname;
@@ -90,6 +91,7 @@ public class AstraDbSession {
         )
         @NotNull
         @Builder.Default
+        @PluginProperty(group = "main")
         private Property<Integer> port = Property.ofValue(9042);
     }
 }

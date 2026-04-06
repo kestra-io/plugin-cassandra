@@ -52,7 +52,7 @@ public class Query extends AbstractQuery {
         title = "Astra DB session configuration",
         description = "Connection settings including secure bundle or proxy (choose one), keyspace, and service credentials."
     )
-    @PluginProperty
+    @PluginProperty(group = "main")
     @NotNull
     protected AstraDbSession session;
 
