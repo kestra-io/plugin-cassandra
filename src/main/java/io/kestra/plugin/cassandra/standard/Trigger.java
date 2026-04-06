@@ -83,7 +83,7 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
         title = "Cassandra session configuration",
         description = "Required connection details (endpoints, datacenter, auth, optional TLS) used to open the polling CqlSession."
     )
-    @PluginProperty
+    @PluginProperty(group = "main")
     @NotNull
     protected CassandraDbSession session;
 

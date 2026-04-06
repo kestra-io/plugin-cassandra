@@ -81,7 +81,7 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
         title = "Astra DB session configuration",
         description = "Required connection details (secure bundle or cloud proxy, keyspace, client credentials). Secure bundle and proxy are mutually exclusive; exactly one must be provided."
     )
-    @PluginProperty
+    @PluginProperty(group = "main")
     @NotNull
     protected AstraDbSession session;
 

@@ -38,23 +38,26 @@ public class CassandraDbSession {
         title = "Contact endpoints for cluster bootstrap",
         description = "List of hosts (and optional SNI names) used to open the initial connection. Port defaults to 9042 per endpoint unless overridden."
     )
-    @PluginProperty(dynamic = true)
+    @PluginProperty(dynamic = true, group = "advanced")
     private List<Endpoint> endpoints;
 
     @Schema(
         title = "Local datacenter name",
         description = "Datacenter considered local by the load-balancing policy; recommended for multi-DC clusters."
     )
+    @PluginProperty(group = "advanced")
     private Property<String> localDatacenter;
 
     @Schema(
         title = "Plaintext authentication username"
     )
+    @PluginProperty(group = "connection")
     private Property<String> username;
 
     @Schema(
         title = "Plaintext authentication password"
     )
+    @PluginProperty(group = "connection")
     private Property<String> password;
 
     @Schema(
@@ -63,10 +66,11 @@ public class CassandraDbSession {
             "new connection established by the driver. Currently, this information is used by Insights monitoring " +
             "(if the target cluster does not support Insights, the entry will be ignored by the server)."
     )
+    @PluginProperty(group = "advanced")
     private Property<String> applicationName;
 
     @Schema(title = "Secure connection details")
-    @PluginProperty(dynamic = true)
+    @PluginProperty(dynamic = true, group = "advanced")
     private SecureConnection secureConnection;
 
     CqlSession connect(RunContext runContext) throws IllegalVariableEvaluationException {
@@ -133,6 +137,7 @@ public class CassandraDbSession {
         )
         @NotNull
         @Builder.Default
+        @PluginProperty(group = "main")
         private Property<Integer> port = Property.ofValue(9042);
 
         @Schema(
@@ -148,21 +153,25 @@ public class CassandraDbSession {
         @Schema(
             title = "Path to truststore file (.crt)"
         )
+        @PluginProperty(group = "advanced")
         private Property<String> truststorePath;
 
         @Schema(
             title = "Password for the truststore file"
         )
+        @PluginProperty(group = "connection")
         private Property<String> truststorePassword;
 
         @Schema(
             title = "Path to keystore file (*.jks)"
         )
+        @PluginProperty(group = "advanced")
         private Property<String> keystorePath;
 
         @Schema(
             title = "Password for the keystore file"
         )
+        @PluginProperty(group = "connection")
         private Property<String> keystorePassword;
 
         void configure(CqlSessionBuilder builder, RunContext runContext) throws IllegalVariableEvaluationException {

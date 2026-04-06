@@ -57,7 +57,7 @@ public class Query extends AbstractQuery {
         title = "Cassandra session configuration",
         description = "Connection settings including endpoints, datacenter, auth, and optional TLS. Required to open the query session."
     )
-    @PluginProperty
+    @PluginProperty(group = "main")
     @NotNull
     protected CassandraDbSession session;
 
