@@ -39,7 +39,7 @@ import lombok.experimental.SuperBuilder;
 
                 tasks:
                   - id: each
-                    type: io.kestra.core.tasks.flows.ForEach
+                    type: io.kestra.plugin.core.flow.ForEach
                     values: "{{ trigger.rows }}"
                     tasks:
                       - id: return
