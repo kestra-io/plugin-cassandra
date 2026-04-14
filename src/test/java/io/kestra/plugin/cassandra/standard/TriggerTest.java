@@ -17,16 +17,9 @@ import io.kestra.core.models.executions.Execution;
 import io.kestra.core.queues.QueueFactoryInterface;
 import io.kestra.core.queues.QueueInterface;
 import io.kestra.core.repositories.LocalFlowRepositoryLoader;
-import io.kestra.core.runners.FlowListeners;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
-import io.kestra.core.runners.Worker;
-import io.kestra.core.utils.IdUtils;
 import io.kestra.core.utils.TestsUtils;
-import io.kestra.jdbc.runner.JdbcScheduler;
-import io.kestra.scheduler.AbstractScheduler;
-
-import io.micronaut.context.ApplicationContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import reactor.core.publisher.Flux;
@@ -34,7 +27,7 @@ import reactor.core.publisher.Flux;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-@KestraTest
+@KestraTest(startRunner = true, startScheduler = true)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TriggerTest {
 
@@ -51,12 +44,6 @@ public class TriggerTest {
     }
 
     @Inject
-    protected ApplicationContext applicationContext;
-
-    @Inject
-    protected FlowListeners flowListenersService;
-
-    @Inject
     @Named(QueueFactoryInterface.EXECUTION_NAMED)
     protected QueueInterface<Execution> executionQueue;
 
@@ -64,34 +51,18 @@ public class TriggerTest {
     protected LocalFlowRepositoryLoader repositoryLoader;
 
     protected Execution triggerFlow(ClassLoader classLoader, String flowRepository, String flow) throws Exception {
-        // mock flow listeners
         CountDownLatch queueCount = new CountDownLatch(1);
+        Flux<Execution> receive = TestsUtils.receive(executionQueue, execution -> {
+            queueCount.countDown();
+            assertThat(execution.getLeft().getFlowId(), is(flow));
+        });
 
-        // scheduler
-        try (Worker worker = applicationContext.createBean(Worker.class, IdUtils.create(), 8, null)) {
-            try (
-                AbstractScheduler scheduler = new JdbcScheduler(
-                    this.applicationContext,
-                    this.flowListenersService
-                );
-            ) {
-                // wait for execution
-                Flux<Execution> receive = TestsUtils.receive(executionQueue, execution ->
-                {
-                    queueCount.countDown();
-                    assertThat(execution.getLeft().getFlowId(), is(flow));
-                });
+        repositoryLoader.load(Objects.requireNonNull(classLoader.getResource(flowRepository)));
 
-                worker.run();
-                scheduler.run();
-                repositoryLoader.load(Objects.requireNonNull(classLoader.getResource(flowRepository)));
+        boolean await = queueCount.await(1, TimeUnit.MINUTES);
+        assertThat(await, is(true));
 
-                boolean await = queueCount.await(1, TimeUnit.MINUTES);
-                assertThat(await, is(true));
-
-                return receive.blockLast();
-            }
-        }
+        return receive.blockLast();
     }
 
     @Test
