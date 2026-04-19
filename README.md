@@ -35,13 +35,18 @@
 </p>
 <p align="center" style="color:grey;"><i>Get started with Kestra in 4 minutes.</i></p>
 
-
 # Kestra Cassandra Plugin
 
-Plugin to interact with [Apache Cassandra](https://cassandra.apache.org/_/index.html) and [DataStax AstraDB](https://www.datastax.com/products/datastax-astra).
+## Why
 
-![Kestra orchestrator](https://kestra.io/video.gif)
+- What user problem does this solve? Teams need to integrate Apache Cassandra into Kestra workflows for querying and event-driven triggers from orchestrated workflows instead of relying on manual console work, ad hoc scripts, or disconnected schedulers.
+- Why would a team adopt this plugin in a workflow? It keeps Apache Cassandra steps in the same Kestra flow as upstream preparation, approvals, retries, notifications, and downstream systems.
+- What operational/business outcome does it enable? It reduces manual handoffs and fragmented tooling while improving reliability, traceability, and delivery speed for processes that depend on Apache Cassandra.
 
+## What
+
+- Provides plugin components under `io.kestra.plugin.cassandra`.
+- Includes classes such as `AstraDbSession`, `Trigger`, `Query`, `CassandraDbSession`.
 
 ## Documentation
 * Full documentation can be found under [kestra.io/docs](https://kestra.io/docs)
