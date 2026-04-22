@@ -51,13 +51,13 @@ public class CassandraDbSession {
     @Schema(
         title = "Plaintext authentication username"
     )
-    @PluginProperty(group = "connection")
+    @PluginProperty(secret = true, group = "connection")
     private Property<String> username;
 
     @Schema(
         title = "Plaintext authentication password"
     )
-    @PluginProperty(group = "connection")
+    @PluginProperty(secret = true, group = "connection")
     private Property<String> password;
 
     @Schema(
@@ -159,7 +159,7 @@ public class CassandraDbSession {
         @Schema(
             title = "Password for the truststore file"
         )
-        @PluginProperty(group = "connection")
+        @PluginProperty(secret = true, group = "connection")
         private Property<String> truststorePassword;
 
         @Schema(
@@ -171,7 +171,7 @@ public class CassandraDbSession {
         @Schema(
             title = "Password for the keystore file"
         )
-        @PluginProperty(group = "connection")
+        @PluginProperty(secret = true, group = "connection")
         private Property<String> keystorePassword;
 
         void configure(CqlSessionBuilder builder, RunContext runContext) throws IllegalVariableEvaluationException {
