@@ -40,10 +40,14 @@ public class AstraDbSession {
     @NotNull
     private Property<String> keyspace;
 
+    @Schema(title = "Client ID for Astra DB")
     @NotNull
+    @PluginProperty(secret = true)
     private Property<String> clientId;
 
+    @Schema(title = "Client secret for Astra DB")
     @NotNull
+    @PluginProperty(secret = true)
     private Property<String> clientSecret;
 
     CqlSession connect(RunContext runContext) throws IllegalVariableEvaluationException {
