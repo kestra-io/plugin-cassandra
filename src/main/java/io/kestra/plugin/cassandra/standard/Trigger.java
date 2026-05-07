@@ -39,12 +39,12 @@ import lombok.experimental.SuperBuilder;
 
                 tasks:
                   - id: each
-                    type: io.kestra.core.tasks.flows.ForEach
+                    type: io.kestra.plugin.core.flow.Loop
                     values: "{{ trigger.rows }}"
                     tasks:
                       - id: return
-                        type: io.kestra.core.tasks.debugs.Return
-                        format: "{{ json(taskrun.value) }}"
+                        type: io.kestra.plugin.core.debug.Return
+                        format: "{{ fromJson(item.value) }}"
 
                 triggers:
                   - id: watch
