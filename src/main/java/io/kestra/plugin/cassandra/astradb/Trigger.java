@@ -1,21 +1,21 @@
 package io.kestra.plugin.cassandra.astradb;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.cassandra.*;
-import io.kestra.plugin.cassandra.astradb.Query;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-
-import jakarta.validation.constraints.NotNull;
 
 @SuperBuilder
 @ToString
@@ -23,7 +23,8 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Trigger a flow on returned results from an Astra DB query."
+    title = "Trigger flow when Astra DB query returns data",
+    description = "Polls Astra DB at a fixed interval (default 60s) and launches a Flow once the CQL query returns at least one row. Use fetchType to control result handling; the NONE default does not fetch rows and the trigger will not fire."
 )
 @Plugin(
     examples = {
@@ -36,12 +37,12 @@ import jakarta.validation.constraints.NotNull;
 
                 tasks:
                   - id: each
-                    type: io.kestra.core.tasks.flows.ForEach
+                    type: io.kestra.plugin.core.flow.ForEach
                     values: "{{ trigger.rows }}"
                     tasks:
                       - id: return
-                        type: io.kestra.core.tasks.debugs.Return
-                        format: "{{ json(taskrun.value) }}"
+                        type: io.kestra.plugin.core.debug.Return
+                        format: "{{ fromJson(taskrun.value) }}"
 
                 triggers:
                   - id: watch
@@ -77,9 +78,10 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
     }
 
     @Schema(
-            title = "The session connection properties."
+        title = "Astra DB session configuration",
+        description = "Required connection details (secure bundle or cloud proxy, keyspace, client credentials). Secure bundle and proxy are mutually exclusive; exactly one must be provided."
     )
-    @PluginProperty
+    @PluginProperty(group = "main")
     @NotNull
     protected AstraDbSession session;
 

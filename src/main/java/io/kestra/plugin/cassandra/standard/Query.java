@@ -1,17 +1,18 @@
 package io.kestra.plugin.cassandra.standard;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.cassandra.AbstractQuery;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import jakarta.validation.constraints.NotNull;
 
 @SuperBuilder
 @ToString
@@ -19,7 +20,8 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Query a Cassandra database with CQL."
+    title = "Run a CQL query on Cassandra",
+    description = "Executes a CQL statement against Cassandra. Use fetchType to control result handling (FETCH, STORE, FETCH_ONE); NONE is the default and only records metrics."
 )
 @Plugin(
     examples = {
@@ -52,12 +54,12 @@ import jakarta.validation.constraints.NotNull;
 )
 public class Query extends AbstractQuery {
     @Schema(
-        title = "The session connection properties."
+        title = "Cassandra session configuration",
+        description = "Connection settings including endpoints, datacenter, auth, and optional TLS. Required to open the query session."
     )
-    @PluginProperty
+    @PluginProperty(group = "main")
     @NotNull
     protected CassandraDbSession session;
-
 
     @Override
     public CqlSession cqlSession(RunContext runContext) throws IllegalVariableEvaluationException {

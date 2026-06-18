@@ -1,6 +1,7 @@
 package io.kestra.plugin.cassandra.standard;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
@@ -9,14 +10,14 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.cassandra.AbstractCQLTrigger;
 import io.kestra.plugin.cassandra.AbstractQuery;
 import io.kestra.plugin.cassandra.QueryInterface;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-
-import jakarta.validation.constraints.NotNull;
 
 @SuperBuilder
 @ToString
@@ -24,7 +25,8 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Trigger a flow on returned results from a Cassandra database query."
+    title = "Trigger flow when Cassandra query returns data",
+    description = "Polls Cassandra at a fixed interval (default 60s) and starts a Flow once the CQL query yields at least one row. Use fetchType to materialize results; the NONE default stores nothing and will not fire the trigger."
 )
 @Plugin(
     examples = {
@@ -37,12 +39,12 @@ import jakarta.validation.constraints.NotNull;
 
                 tasks:
                   - id: each
-                    type: io.kestra.core.tasks.flows.ForEach
+                    type: io.kestra.plugin.core.flow.ForEach
                     values: "{{ trigger.rows }}"
                     tasks:
                       - id: return
-                        type: io.kestra.core.tasks.debugs.Return
-                        format: "{{ json(taskrun.value) }}"
+                        type: io.kestra.plugin.core.debug.Return
+                        format: "{{ fromJson(taskrun.value) }}"
 
                 triggers:
                   - id: watch
@@ -78,9 +80,10 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
     }
 
     @Schema(
-        title = "The session connection properties"
+        title = "Cassandra session configuration",
+        description = "Required connection details (endpoints, datacenter, auth, optional TLS) used to open the polling CqlSession."
     )
-    @PluginProperty
+    @PluginProperty(group = "main")
     @NotNull
     protected CassandraDbSession session;
 
@@ -89,5 +92,3 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
         return this.session.connect(runContext);
     }
 }
-
-

@@ -1,22 +1,24 @@
 package io.kestra.plugin.cassandra;
 
-import io.kestra.core.models.annotations.PluginProperty;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+
 import io.kestra.core.models.conditions.ConditionContext;
 import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.common.FetchType;
 import io.kestra.core.models.triggers.*;
 import io.kestra.core.runners.RunContext;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.slf4j.Logger;
-
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -33,22 +35,23 @@ public abstract class AbstractCQLTrigger extends AbstractTrigger implements Poll
         title = "CQL query."
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> cql;
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
-    private Property<Boolean> store = Property.of(false);
+    private Property<Boolean> store = Property.ofValue(false);
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
-    private Property<Boolean> fetchOne = Property.of(false);
+    private Property<Boolean> fetchOne = Property.ofValue(false);
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Builder.Default
-    private Property<Boolean> fetch = Property.of(false);
+    private Property<Boolean> fetch = Property.ofValue(false);
 
     @Builder.Default
-    protected Property<FetchType> fetchType = Property.of(FetchType.NONE);
+    protected Property<FetchType> fetchType = Property.ofValue(FetchType.NONE);
 
     @Builder.Default
     @Getter(AccessLevel.NONE)

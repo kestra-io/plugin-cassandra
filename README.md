@@ -19,26 +19,34 @@
 <br />
 
 <p align="center">
-    <a href="https://twitter.com/kestra_io"><img height="25" src="https://kestra.io/twitter.svg" alt="twitter" /></a> &nbsp;
-    <a href="https://www.linkedin.com/company/kestra/"><img height="25" src="https://kestra.io/linkedin.svg" alt="linkedin" /></a> &nbsp;
-<a href="https://www.youtube.com/@kestra-io"><img height="25" src="https://kestra.io/youtube.svg" alt="youtube" /></a> &nbsp;
+  <a href="https://twitter.com/kestra_io" style="margin: 0 10px;">
+        <img src="https://kestra.io/twitter.svg" alt="twitter" width="35" height="25" /></a>
+  <a href="https://www.linkedin.com/company/kestra/" style="margin: 0 10px;">
+        <img src="https://kestra.io/linkedin.svg" alt="linkedin" width="35" height="25" /></a>
+  <a href="https://www.youtube.com/@kestra-io" style="margin: 0 10px;">
+        <img src="https://kestra.io/youtube.svg" alt="youtube" width="35" height="25" /></a>
 </p>
 
 <br />
 <p align="center">
-    <a href="https://www.youtube.com/watch?v=h-P0eK2xN58&ab_channel=Kestra" target="_blank">
+    <a href="https://go.kestra.io/video/product-overview" target="_blank">
         <img src="https://kestra.io/startvideo.png" alt="Get started in 4 minutes with Kestra" width="640px" />
     </a>
 </p>
 <p align="center" style="color:grey;"><i>Get started with Kestra in 4 minutes.</i></p>
 
-
 # Kestra Cassandra Plugin
 
-Plugin to interact with [Apache Cassandra](https://cassandra.apache.org/_/index.html) and [DataStax AstraDB](https://www.datastax.com/products/datastax-astra).
+## Why
 
-![Kestra orchestrator](https://kestra.io/video.gif)
+- What user problem does this solve? Teams need to integrate Apache Cassandra into Kestra workflows for querying and event-driven triggers from orchestrated workflows instead of relying on manual console work, ad hoc scripts, or disconnected schedulers.
+- Why would a team adopt this plugin in a workflow? It keeps Apache Cassandra steps in the same Kestra flow as upstream preparation, approvals, retries, notifications, and downstream systems.
+- What operational/business outcome does it enable? It reduces manual handoffs and fragmented tooling while improving reliability, traceability, and delivery speed for processes that depend on Apache Cassandra.
 
+## What
+
+- Provides plugin components under `io.kestra.plugin.cassandra`.
+- Includes classes such as `AstraDbSession`, `Trigger`, `Query`, `CassandraDbSession`.
 
 ## Documentation
 * Full documentation can be found under [kestra.io/docs](https://kestra.io/docs)

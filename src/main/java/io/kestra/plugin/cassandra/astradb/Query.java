@@ -1,18 +1,18 @@
 package io.kestra.plugin.cassandra.astradb;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
-import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.cassandra.AbstractQuery;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import jakarta.validation.constraints.NotNull;
 
 @SuperBuilder
 @ToString
@@ -20,7 +20,8 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Query Astra DB with CQL."
+    title = "Run a CQL query on Astra DB",
+    description = "Executes a CQL statement against Astra DB. Use fetchType to control result handling (FETCH, STORE, FETCH_ONE); NONE is the default and only records metrics."
 )
 @Plugin(
     examples = {
@@ -48,9 +49,10 @@ import jakarta.validation.constraints.NotNull;
 )
 public class Query extends AbstractQuery {
     @Schema(
-        title = "The session connection properties."
+        title = "Astra DB session configuration",
+        description = "Connection settings including secure bundle or proxy (choose one), keyspace, and service credentials."
     )
-    @PluginProperty
+    @PluginProperty(group = "main")
     @NotNull
     protected AstraDbSession session;
 
