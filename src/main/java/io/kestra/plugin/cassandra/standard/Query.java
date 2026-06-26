@@ -40,11 +40,11 @@ import lombok.experimental.SuperBuilder;
                         - hostname: localhost
                       secureConnection:
                         truststorePath: path to .crt file
-                        truststorePassword: truststore_password
+                        truststorePassword: "{{ secret('TRUSTSTORE_PASSWORD') }}"
                         keystorePath: path to .jks file
-                        keystorePassword: keystore_password
+                        keystorePassword: "{{ secret('KEYSTORE_PASSWORD') }}"
                       username: cassandra_user
-                      password: cassandra_passwd
+                      password: "{{ secret('CASSANDRA_PASSWORD') }}"
                     cql: SELECT * FROM CQL_KEYSPACE.CQL_TABLE
                     fetchType: FETCH
                 """

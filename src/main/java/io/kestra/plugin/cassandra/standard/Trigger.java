@@ -54,7 +54,7 @@ import lombok.experimental.SuperBuilder;
                        endpoints:
                           - hostname: localhost
                        username: cassandra_user
-                       password: cassandra_passwd
+                       password: "{{ secret('CASSANDRA_PASSWORD') }}"
                     cql: "SELECT * FROM CQL_KEYSPACE.CQL_TABLE"
                     fetchType: FETCH
                 """

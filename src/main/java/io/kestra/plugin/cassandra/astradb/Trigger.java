@@ -52,7 +52,7 @@ import lombok.experimental.SuperBuilder;
                         secureBundle: /path/to/secureBundle.zip
                         keyspace: astradb_keyspace
                         clientId: astradb_clientId
-                        clientSecret: astradb_clientSecret
+                        clientSecret: "{{ secret('ASTRADB_CLIENT_SECRET') }}"
                     cql: "SELECT * FROM CQL_KEYSPACE.CQL_TABLE"
                     fetchType: FETCH
                 """

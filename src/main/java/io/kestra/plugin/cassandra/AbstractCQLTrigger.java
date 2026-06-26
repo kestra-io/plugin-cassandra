@@ -29,10 +29,11 @@ public abstract class AbstractCQLTrigger extends AbstractTrigger implements Poll
     @Builder.Default
     private final Duration interval = Duration.ofSeconds(60);
 
+    @Schema(title = "Time zone id used to parse date/time values returned by the query")
     private String timeZoneId;
 
     @Schema(
-        title = "CQL query."
+        title = "CQL query"
     )
     @NotNull
     @PluginProperty(group = "main")
