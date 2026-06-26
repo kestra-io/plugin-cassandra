@@ -13,7 +13,7 @@ import io.kestra.core.models.annotations.PluginProperty;
 
 public interface QueryInterface {
     @Schema(
-        title = "CQL query to execute."
+        title = "CQL query to execute"
     )
     @NotNull
     @PluginProperty(group = "main")
@@ -22,7 +22,7 @@ public interface QueryInterface {
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Schema(
         title = "DEPRECATED, please use `fetchType: FETCH` instead." +
-            "Whether to fetch the data from the query result to the task output."
+            "Whether to fetch the data from the query result to the task output"
     )
     @PluginProperty(group = "execution")
     Property<Boolean> getFetch();
@@ -30,7 +30,7 @@ public interface QueryInterface {
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Schema(
         title = "DEPRECATED, please use `fetchType: STORE` instead." +
-            "Whether to store the data from the query result into an ion serialized data file."
+            "Whether to store the data from the query result into an ion serialized data file"
     )
     @PluginProperty(group = "advanced")
     Property<Boolean> getStore();
@@ -38,13 +38,13 @@ public interface QueryInterface {
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Schema(
         title = "DEPRECATED, please use `fetchType: FETCH_ONE` instead." +
-            "Whether to fetch only one data row from the query result to the task output."
+            "Whether to fetch only one data row from the query result to the task output"
     )
     @PluginProperty(group = "execution")
     Property<Boolean> getFetchOne();
 
     @Schema(
-        title = "The way you want to store data.",
+        title = "The way you want to store data",
         description = "FETCH_ONE - output the first row.\n"
             + "FETCH - output all rows as output variable.\n"
             + "STORE - store all rows to a file.\n"

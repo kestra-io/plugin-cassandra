@@ -274,7 +274,7 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
         private final Long size;
 
         @Schema(
-            title = "The size of the binary response in bytes."
+            title = "The size of the binary response in bytes"
         )
         private final Integer bytes;
     }
