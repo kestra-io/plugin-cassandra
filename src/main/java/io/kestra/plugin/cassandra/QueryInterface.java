@@ -21,7 +21,7 @@ public interface QueryInterface {
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Schema(
-        title = "DEPRECATED, please use `fetchType: FETCH` instead." +
+        title = "DEPRECATED, please use `fetchType: FETCH` instead. " +
             "Whether to fetch the data from the query result to the task output"
     )
     @PluginProperty(group = "execution")
@@ -29,15 +29,15 @@ public interface QueryInterface {
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Schema(
-        title = "DEPRECATED, please use `fetchType: STORE` instead." +
-            "Whether to store the data from the query result into an ion serialized data file"
+        title = "DEPRECATED, please use `fetchType: STORE` instead. " +
+            "Whether to store the data from the query result into an ION serialized data file"
     )
     @PluginProperty(group = "advanced")
     Property<Boolean> getStore();
 
     @Deprecated(since = "0.22.0", forRemoval = true)
     @Schema(
-        title = "DEPRECATED, please use `fetchType: FETCH_ONE` instead." +
+        title = "DEPRECATED, please use `fetchType: FETCH_ONE` instead. " +
             "Whether to fetch only one data row from the query result to the task output"
     )
     @PluginProperty(group = "execution")
