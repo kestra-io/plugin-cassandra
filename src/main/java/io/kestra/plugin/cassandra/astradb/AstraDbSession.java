@@ -37,7 +37,7 @@ public class AstraDbSession {
     @PluginProperty(group = "advanced")
     private ProxyAddress proxyAddress;
 
-    @Schema(title = "Keyspace", description = "Astra DB keyspace to connect to.")
+    @Schema(title = "Keyspace", description = "Astra DB keyspace to connect to")
     @NotNull
     private Property<String> keyspace;
 
