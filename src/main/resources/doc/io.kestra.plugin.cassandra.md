@@ -10,7 +10,7 @@ Connection details are configured via a `session` object on each task.
 
 **Astra DB**: set `secureBundle` (a base64-encoded secure connect bundle ZIP available from the Astra console), `keyspace`, `clientId`, and `clientSecret`.
 
-Store credentials in [secrets](https://kestra.io/docs/concepts/secret) and apply `session` globally with [plugin defaults](https://kestra.io/docs/workflow-components/plugin-defaults) when all tasks in a flow target the same cluster.
+Store credentials in [secrets](https://kestra.io/docs/concepts/secret) and set `session` on each task.
 
 ## Tasks
 
