@@ -49,7 +49,7 @@ import lombok.experimental.SuperBuilder;
                     type: io.kestra.plugin.cassandra.astradb.Trigger
                     interval: "PT5M"
                     session:
-                        secureBundle: /path/to/secureBundle.zip
+                        secureBundle: "{{ secret('ASTRADB_SECURE_BUNDLE') }}"
                         keyspace: astradb_keyspace
                         clientId: astradb_clientId
                         clientSecret: "{{ secret('ASTRADB_CLIENT_SECRET') }}"

@@ -36,7 +36,7 @@ import lombok.experimental.SuperBuilder;
                   - id: query
                     type: io.kestra.plugin.cassandra.astradb.Query
                     session:
-                      secureBundle: /path/to/secureBundle.zip
+                      secureBundle: "{{ secret('ASTRADB_SECURE_BUNDLE') }}"
                       keyspace: astradb_keyspace
                       clientId: astradb_clientId
                       clientSecret: "{{ secret('ASTRADB_CLIENT_SECRET') }}"

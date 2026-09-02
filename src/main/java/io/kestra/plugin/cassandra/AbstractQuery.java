@@ -54,7 +54,7 @@ import reactor.core.publisher.Flux;
             name = "fetch.size",
             type = Counter.TYPE,
             unit = "records",
-            description = "The number of rows fetch from the embedding store."
+            description = "The number of rows fetched from the query result."
         )
     }
 )
@@ -251,25 +251,25 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
             title = "Map containing the first row of fetched data",
-            description = "Only populated if 'fetchOne' parameter is set to true."
+            description = "Only populated when fetchType is FETCH_ONE."
         )
         private final Map<String, Object> row;
 
         @Schema(
-            title = "Lit of map containing rows of fetched data",
-            description = "Only populated if 'fetch' parameter is set to true."
+            title = "List of maps containing rows of fetched data",
+            description = "Only populated when fetchType is FETCH."
         )
         private final List<Map<String, Object>> rows;
 
         @Schema(
-            title = "The url of the result file on kestra storage (.ion file / Amazon Ion text format)",
-            description = "Only populated if 'store' is set to true."
+            title = "The URI of the result file on Kestra storage (.ion file / Amazon Ion text format)",
+            description = "Only populated when fetchType is STORE."
         )
         private final URI uri;
 
         @Schema(
             title = "The size of the fetched rows",
-            description = "Only populated if 'store' or 'fetch' parameter is set to true."
+            description = "Only populated when fetchType is FETCH or STORE."
         )
         private final Long size;
 
