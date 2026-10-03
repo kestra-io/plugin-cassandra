@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
@@ -78,7 +79,14 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
     protected Property<String> cql;
 
     public AbstractQuery.Output run(RunContext runContext) throws Exception {
+        return run(runContext, session ->
+        {
+        });
+    }
+
+    protected AbstractQuery.Output run(RunContext runContext, Consumer<CqlSession> onSession) throws Exception {
         try (CqlSession session = this.cqlSession(runContext)) {
+            onSession.accept(session);
             ResultSet rs = session.execute(runContext.render(cql).as(String.class).orElse(null));
             ColumnDefinitions columnDefinitions = rs.getColumnDefinitions();
 
