@@ -74,7 +74,7 @@ public class Trigger extends AbstractCQLTrigger implements QueryInterface {
             .fetchOne(this.getFetchOne())
             .fetchType(this.getFetchType())
             .build();
-        return query.run(runContext);
+        return runQuery(runContext, query);
     }
 
     @Schema(
