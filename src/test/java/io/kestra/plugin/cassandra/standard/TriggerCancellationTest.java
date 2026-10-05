@@ -58,7 +58,7 @@ class TriggerCancellationTest {
     void killUnblocksQueryAndCanBeRepeated(boolean astra) throws Exception {
         var client = new TestSession(true, false, false);
         var trigger = trigger(client, astra);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() -> evaluate(trigger));
             assertTrue(client.requestStarted.await(5, TimeUnit.SECONDS));
@@ -67,7 +67,8 @@ class TriggerCancellationTest {
             trigger.kill();
 
             assertTrue(client.forceClosed.await(5, TimeUnit.SECONDS));
-            assertThrows(ExecutionException.class, () -> poll.get(5, TimeUnit.SECONDS));
+            var error = assertThrows(ExecutionException.class, () -> poll.get(5, TimeUnit.SECONDS));
+            assertInstanceOf(CancellationException.class, error.getCause());
             assertEquals(1, client.forcedCloses.get());
         } finally {
             client.release.countDown();
@@ -78,10 +79,33 @@ class TriggerCancellationTest {
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
+    void stopUnblocksQueryAndCanBeRepeated(boolean astra) throws Exception {
+        var client = new TestSession(true, false, false);
+        var trigger = trigger(client, astra);
+        var executor = Executors.newSingleThreadExecutor();
+        try {
+            var poll = executor.submit(() -> evaluate(trigger));
+            assertTrue(client.requestStarted.await(5, TimeUnit.SECONDS));
+
+            trigger.stop();
+            trigger.stop();
+
+            var error = assertThrows(ExecutionException.class, () -> poll.get(5, TimeUnit.SECONDS));
+            assertInstanceOf(CancellationException.class, error.getCause());
+            assertEquals("Session closed", error.getCause().getCause().getMessage());
+            assertEquals(1, client.forcedCloses.get());
+        } finally {
+            client.release.countDown();
+            stopExecutor(executor);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
     void killUpgradesBlockedGracefulClose(boolean astra) throws Exception {
         var client = new TestSession(false, true, false);
         var trigger = trigger(client, astra);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() -> evaluate(trigger));
             assertTrue(client.closeStarted.await(5, TimeUnit.SECONDS));
@@ -102,7 +126,7 @@ class TriggerCancellationTest {
     void killWhileConnectingClosesLateSessionBeforeQuery(boolean astra) throws Exception {
         var client = new TestSession(false, false, true);
         var trigger = trigger(client, astra);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() -> evaluate(trigger));
             assertTrue(client.connectionStarted.await(5, TimeUnit.SECONDS));
@@ -127,7 +151,7 @@ class TriggerCancellationTest {
         var client = new TestSession(true, false, false);
         var trigger = trigger(client, astra);
         var waitingThread = new AtomicReference<Thread>();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() ->
             {
@@ -156,7 +180,7 @@ class TriggerCancellationTest {
         client.blockRows = true;
         var trigger = trigger(client, astra);
         var waitingThread = new AtomicReference<Thread>();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() ->
             {
@@ -183,7 +207,7 @@ class TriggerCancellationTest {
         var client = new TestSession(false, false, true);
         var trigger = trigger(client, astra);
         var waitingThread = new AtomicReference<Thread>();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() ->
             {
@@ -217,7 +241,7 @@ class TriggerCancellationTest {
         var next = new TestSession(false, false, false);
         var connections = new AtomicInteger();
         var trigger = trigger(() -> connections.getAndIncrement() == 0 ? connecting : next, astra);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() -> evaluate(trigger));
             assertTrue(connecting.connectionStarted.await(5, TimeUnit.SECONDS));
@@ -226,7 +250,8 @@ class TriggerCancellationTest {
             connecting.connectionRelease.countDown();
 
             var error = assertThrows(ExecutionException.class, () -> poll.get(5, TimeUnit.SECONDS));
-            assertInstanceOf(IllegalStateException.class, error.getCause());
+            assertInstanceOf(CancellationException.class, error.getCause());
+            assertSame(connecting.connectionFailure, error.getCause().getCause());
             trigger.kill();
             assertEquals(0, connecting.forcedCloses.get());
             assertEquals(0, connecting.requests.get());
@@ -276,7 +301,7 @@ class TriggerCancellationTest {
         var client = new TestSession(false, false, false);
         client.blockRows = true;
         var trigger = trigger(client, astra);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() -> evaluate(trigger));
             assertTrue(client.pageStarted.await(5, TimeUnit.SECONDS));
@@ -298,7 +323,7 @@ class TriggerCancellationTest {
         client.returnOnKill = true;
         client.rowCount = 1;
         var trigger = trigger(client, astra);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() -> evaluate(trigger));
             assertTrue(client.requestStarted.await(5, TimeUnit.SECONDS));
@@ -319,7 +344,7 @@ class TriggerCancellationTest {
         var client = new TestSession(true, false, false);
         client.closeFuture = new CompletableFuture<>();
         var trigger = trigger(client, astra);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() -> evaluate(trigger));
             assertTrue(client.requestStarted.await(5, TimeUnit.SECONDS));
@@ -340,7 +365,7 @@ class TriggerCancellationTest {
         var client = new TestSession(true, false, false);
         client.closeFailure = new IllegalStateException("Close failed");
         var trigger = trigger(client, false);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() -> evaluate(trigger));
             assertTrue(client.requestStarted.await(5, TimeUnit.SECONDS));
@@ -364,7 +389,7 @@ class TriggerCancellationTest {
         var second = new TestSession(true, false, false);
         var connections = new AtomicInteger();
         var trigger = trigger(() -> connections.getAndIncrement() == 0 ? first : second, astra);
-        ExecutorService executor = Executors.newFixedThreadPool(2);
+        var executor = Executors.newFixedThreadPool(2);
         try {
             var firstPoll = executor.submit(() -> evaluate(trigger));
             assertTrue(first.requestStarted.await(5, TimeUnit.SECONDS));
@@ -391,7 +416,7 @@ class TriggerCancellationTest {
         var next = new TestSession(false, false, false);
         var connections = new AtomicInteger();
         var trigger = trigger(() -> connections.getAndIncrement() == 0 ? first : next, astra);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        var executor = Executors.newSingleThreadExecutor();
         try {
             var poll = executor.submit(() -> evaluate(trigger));
             assertTrue(first.requestStarted.await(5, TimeUnit.SECONDS));
@@ -538,7 +563,7 @@ class TriggerCancellationTest {
                     if (blockQuery) {
                         awaitUninterruptibly(release);
                         if (!returnOnKill) {
-                            throw new CancellationException("Query aborted by forced close");
+                            throw new IllegalStateException("Session closed");
                         }
                     }
                     yield result;

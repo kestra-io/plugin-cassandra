@@ -110,8 +110,7 @@ public abstract class AbstractCQLTrigger extends AbstractTrigger implements Poll
         });
         Thread queryThread;
         try {
-            // Driver query, paging, and session-building waits ignore interrupts. Keep the worker
-            // wait interruptible so Kestra's polling deadline can reach its timeout handler.
+            // Driver waits ignore interrupts; keep the worker wait interruptible for the polling deadline.
             queryThread = Thread.ofVirtual().name("cassandra-poll-" + getId()).start(result);
         } catch (RuntimeException | Error e) {
             runningQueries.remove(pollingQuery);
@@ -124,6 +123,11 @@ public abstract class AbstractCQLTrigger extends AbstractTrigger implements Poll
             queryThread.interrupt();
             throw e;
         } catch (ExecutionException e) {
+            if (pollingQuery.killed.get()) {
+                var cancellation = new CancellationException("Cassandra polling trigger was killed");
+                cancellation.initCause(e.getCause());
+                throw cancellation;
+            }
             if (e.getCause() instanceof Exception cause) {
                 throw cause;
             }
@@ -137,6 +141,11 @@ public abstract class AbstractCQLTrigger extends AbstractTrigger implements Poll
     @Override
     public void kill() {
         runningQueries.forEach(PollingQuery::kill);
+    }
+
+    @Override
+    public void stop() {
+        kill();
     }
 
     private static final class PollingQuery {
