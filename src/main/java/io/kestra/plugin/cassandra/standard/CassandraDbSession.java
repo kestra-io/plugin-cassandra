@@ -16,6 +16,8 @@ import javax.net.ssl.TrustManagerFactory;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
+import com.datastax.oss.driver.api.core.ssl.ProgrammaticSslEngineFactory;
+import com.datastax.oss.driver.api.core.ssl.SslEngineFactory;
 import com.datastax.oss.driver.internal.core.metadata.DefaultEndPoint;
 import com.datastax.oss.driver.internal.core.metadata.SniEndPoint;
 
@@ -182,7 +184,23 @@ public class CassandraDbSession {
         @PluginProperty(secret = true, group = "connection")
         private Property<String> keystorePassword;
 
+        @Schema(
+            title = "Verify the server hostname",
+            description = """
+                Enabled by default. The node certificate must match the endpoint hostname in addition to chaining to the truststore.
+                For endpoints with a server name, the proxy hostname is checked.
+                Nodes discovered from the cluster metadata (everything except the endpoints you configure) are reached by IP address, so they are checked against their reverse DNS name, or their IP address when there is none.
+                A multi-node cluster whose certificates carry neither the node hostnames nor IP address entries needs this set to `false`."""
+        )
+        @Builder.Default
+        @PluginProperty(group = "advanced")
+        private Property<Boolean> hostnameValidation = Property.ofValue(true);
+
         void configure(CqlSessionBuilder builder, RunContext runContext) throws IllegalVariableEvaluationException {
+            builder.withSslEngineFactory(sslEngineFactory(runContext));
+        }
+
+        SslEngineFactory sslEngineFactory(RunContext runContext) throws IllegalVariableEvaluationException {
             var rTruststorePath = renderStorePath(runContext, "truststorePath", this.truststorePath);
             var rKeystorePath = this.keystorePath == null ? null : renderStorePath(runContext, "keystorePath", this.keystorePath);
 
@@ -190,7 +208,11 @@ public class CassandraDbSession {
                 var sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(keyManagers(runContext, rKeystorePath), trustManagers(runContext, rTruststorePath), null);
 
-                builder.withSslContext(sslContext);
+                return new ProgrammaticSslEngineFactory(
+                    sslContext,
+                    null,
+                    runContext.render(this.hostnameValidation).as(Boolean.class).orElse(true)
+                );
             } catch (Exception e) {
                 throw new IllegalVariableEvaluationException("Failed to configure SSL", e);
             }

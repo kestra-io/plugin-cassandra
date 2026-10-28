@@ -1,13 +1,13 @@
 package io.kestra.plugin.cassandra.standard;
 
 import java.io.FileInputStream;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -21,7 +21,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.datastax.oss.driver.api.core.CqlSessionBuilder;
+import com.datastax.oss.driver.api.core.ssl.SslEngineFactory;
+import com.datastax.oss.driver.internal.core.metadata.DefaultEndPoint;
 
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.junit.annotations.KestraTest;
@@ -51,6 +52,7 @@ class SecureConnectionTest {
         keytool("-genkeypair", "-alias", "other", "-keyalg", "RSA", "-dname", "CN=other", "-keystore", store("other.p12"));
         keytool("-genkeypair", "-alias", "client", "-keyalg", "RSA", "-dname", "CN=client", "-keystore", store("client.p12"));
         trust("server", "server.p12", "truststore.p12");
+        trust("other", "other.p12", "other-truststore.p12");
         trust("client", "client.p12", "server-truststore.p12");
     }
 
@@ -61,7 +63,7 @@ class SecureConnectionTest {
             .truststorePassword(Property.ofValue(PASSWORD))
             .build();
 
-        assertThat(handshake(configuredSslContext(secureConnection), serverSslContext("server.p12", null), false), is(true));
+        assertThat(handshake(clientEngineFactory(secureConnection), serverSslContext("server.p12", null), false), is(true));
     }
 
     @Test
@@ -70,10 +72,33 @@ class SecureConnectionTest {
             .truststorePath(Property.ofValue(store("truststore.p12")))
             .truststorePassword(Property.ofValue(PASSWORD))
             .build();
-        var client = configuredSslContext(secureConnection);
+        var client = clientEngineFactory(secureConnection);
         var server = serverSslContext("other.p12", null);
 
         assertThrows(SSLHandshakeException.class, () -> handshake(client, server, false));
+    }
+
+    @Test
+    void shouldRejectCertificateForAnotherHostByDefault() throws Exception {
+        var secureConnection = CassandraDbSession.SecureConnection.builder()
+            .truststorePath(Property.ofValue(store("other-truststore.p12")))
+            .truststorePassword(Property.ofValue(PASSWORD))
+            .build();
+        var client = clientEngineFactory(secureConnection);
+        var server = serverSslContext("other.p12", null);
+
+        assertThrows(SSLHandshakeException.class, () -> handshake(client, server, false));
+    }
+
+    @Test
+    void shouldAcceptCertificateForAnotherHostWhenHostnameValidationIsDisabled() throws Exception {
+        var secureConnection = CassandraDbSession.SecureConnection.builder()
+            .truststorePath(Property.ofValue(store("other-truststore.p12")))
+            .truststorePassword(Property.ofValue(PASSWORD))
+            .hostnameValidation(Property.ofValue(false))
+            .build();
+
+        assertThat(handshake(clientEngineFactory(secureConnection), serverSslContext("other.p12", null), false), is(true));
     }
 
     @Test
@@ -85,7 +110,7 @@ class SecureConnectionTest {
             .keystorePassword(Property.ofValue(PASSWORD))
             .build();
 
-        assertThat(handshake(configuredSslContext(secureConnection), serverSslContext("server.p12", "server-truststore.p12"), true), is(true));
+        assertThat(handshake(clientEngineFactory(secureConnection), serverSslContext("server.p12", "server-truststore.p12"), true), is(true));
     }
 
     @Test
@@ -95,7 +120,7 @@ class SecureConnectionTest {
             .keystorePassword(Property.ofValue(PASSWORD))
             .build();
 
-        var exception = assertThrows(IllegalVariableEvaluationException.class, () -> configuredSslContext(secureConnection));
+        var exception = assertThrows(IllegalVariableEvaluationException.class, () -> clientEngineFactory(secureConnection));
 
         assertThat(exception.getMessage(), containsString("secureConnection.truststorePath is missing or empty"));
     }
@@ -106,24 +131,13 @@ class SecureConnectionTest {
             .truststorePath(Property.ofValue(" "))
             .build();
 
-        var exception = assertThrows(IllegalVariableEvaluationException.class, () -> configuredSslContext(secureConnection));
+        var exception = assertThrows(IllegalVariableEvaluationException.class, () -> clientEngineFactory(secureConnection));
 
         assertThat(exception.getMessage(), containsString("secureConnection.truststorePath is missing or empty"));
     }
 
-    private SSLContext configuredSslContext(CassandraDbSession.SecureConnection secureConnection) throws Exception {
-        var sslContext = new AtomicReference<SSLContext>();
-        var builder = new CqlSessionBuilder() {
-            @Override
-            public CqlSessionBuilder withSslContext(SSLContext context) {
-                sslContext.set(context);
-                return super.withSslContext(context);
-            }
-        };
-
-        secureConnection.configure(builder, runContextFactory.of(Map.of()));
-
-        return sslContext.get();
+    private SslEngineFactory clientEngineFactory(CassandraDbSession.SecureConnection secureConnection) throws Exception {
+        return secureConnection.sslEngineFactory(runContextFactory.of(Map.of()));
     }
 
     private static SSLContext serverSslContext(String keystore, String clientTruststore) throws Exception {
@@ -142,9 +156,8 @@ class SecureConnectionTest {
         return tmf.getTrustManagers();
     }
 
-    private static boolean handshake(SSLContext clientContext, SSLContext serverContext, boolean needClientAuth) throws Exception {
-        var client = clientContext.createSSLEngine("localhost", 9042);
-        client.setUseClientMode(true);
+    private static boolean handshake(SslEngineFactory clientFactory, SSLContext serverContext, boolean needClientAuth) throws Exception {
+        var client = clientFactory.newSslEngine(new DefaultEndPoint(new InetSocketAddress("localhost", 9042)));
         var server = serverContext.createSSLEngine();
         server.setUseClientMode(false);
         server.setNeedClientAuth(needClientAuth);
