@@ -155,7 +155,9 @@ public class CassandraDbSession {
     @Builder
     public static class SecureConnection {
         @Schema(
-            title = "Path to truststore file (JKS or PKCS12)"
+            title = "Path to truststore file (JKS or PKCS12)",
+            description = """
+                Required when `secureConnection` is set. The truststore holds the CA certificate that signed the server's certificate."""
         )
         @PluginProperty(group = "advanced")
         private Property<String> truststorePath;
@@ -168,7 +170,8 @@ public class CassandraDbSession {
 
         @Schema(
             title = "Path to keystore file (JKS or PKCS12)",
-            description = "Only needed when the server requires client certificates (mutual TLS)."
+            description = """
+                Only needed when the server requires client certificates (mutual TLS)."""
         )
         @PluginProperty(group = "advanced")
         private Property<String> keystorePath;
@@ -180,9 +183,12 @@ public class CassandraDbSession {
         private Property<String> keystorePassword;
 
         void configure(CqlSessionBuilder builder, RunContext runContext) throws IllegalVariableEvaluationException {
+            var rTruststorePath = renderStorePath(runContext, "truststorePath", this.truststorePath);
+            var rKeystorePath = this.keystorePath == null ? null : renderStorePath(runContext, "keystorePath", this.keystorePath);
+
             try {
                 var sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(keyManagers(runContext), trustManagers(runContext), null);
+                sslContext.init(keyManagers(runContext, rKeystorePath), trustManagers(runContext, rTruststorePath), null);
 
                 builder.withSslContext(sslContext);
             } catch (Exception e) {
@@ -190,30 +196,38 @@ public class CassandraDbSession {
             }
         }
 
-        private KeyManager[] keyManagers(RunContext runContext) throws GeneralSecurityException, IOException, IllegalVariableEvaluationException {
-            if (this.keystorePath == null) {
+        private KeyManager[] keyManagers(RunContext runContext, String rKeystorePath) throws GeneralSecurityException, IOException, IllegalVariableEvaluationException {
+            if (rKeystorePath == null) {
                 return null;
             }
 
-            var password = renderPassword(runContext, this.keystorePassword);
+            var rKeystorePassword = renderPassword(runContext, this.keystorePassword);
             var kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            kmf.init(loadStore(runContext, this.keystorePath, password), password);
+            kmf.init(loadStore(rKeystorePath, rKeystorePassword), rKeystorePassword);
             return kmf.getKeyManagers();
         }
 
-        private TrustManager[] trustManagers(RunContext runContext) throws GeneralSecurityException, IOException, IllegalVariableEvaluationException {
+        private TrustManager[] trustManagers(RunContext runContext, String rTruststorePath) throws GeneralSecurityException, IOException, IllegalVariableEvaluationException {
             var tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(loadStore(runContext, this.truststorePath, renderPassword(runContext, this.truststorePassword)));
+            tmf.init(loadStore(rTruststorePath, renderPassword(runContext, this.truststorePassword)));
             return tmf.getTrustManagers();
+        }
+
+        private static String renderStorePath(RunContext runContext, String name, Property<String> path) throws IllegalVariableEvaluationException {
+            return runContext.render(path).as(String.class).filter(p -> !p.isBlank()).orElseThrow(
+                () -> new IllegalVariableEvaluationException(
+                    "secureConnection." + name + " is missing or empty. Set it to the path of a JKS or PKCS12 file on the worker."
+                )
+            );
         }
 
         private static char[] renderPassword(RunContext runContext, Property<String> password) throws IllegalVariableEvaluationException {
             return runContext.render(password).as(String.class).map(String::toCharArray).orElse(null);
         }
 
-        private static KeyStore loadStore(RunContext runContext, Property<String> path, char[] password) throws GeneralSecurityException, IOException, IllegalVariableEvaluationException {
+        private static KeyStore loadStore(String path, char[] password) throws GeneralSecurityException, IOException {
             var store = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (var in = new FileInputStream(runContext.render(path).as(String.class).orElseThrow())) {
+            try (var in = new FileInputStream(path)) {
                 store.load(in, password);
             }
             return store;

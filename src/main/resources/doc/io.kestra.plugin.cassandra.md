@@ -6,7 +6,7 @@ Run CQL queries against a self-managed Cassandra cluster or DataStax Astra DB fr
 
 Connection details are configured via a `session` object on each task.
 
-**Standard Cassandra**: set `endpoints` (a list of `hostname`/`port` objects), `localDatacenter`, and optionally `username` and `password` for plain-text auth. Enable SSL/TLS via `secureConnection` with `truststorePath` and `keystorePath`.
+**Standard Cassandra**: set `endpoints` (a list of `hostname`/`port` objects), `localDatacenter`, and optionally `username` and `password` for plain-text auth. Enable SSL/TLS via `secureConnection`: `truststorePath` is required, and `keystorePath` with `keystorePassword` is only needed when the server requires client certificates (mutual TLS).
 
 **Astra DB**: set `secureBundle` (a base64-encoded secure connect bundle ZIP available from the Astra console), `keyspace`, `clientId`, and `clientSecret`.
 

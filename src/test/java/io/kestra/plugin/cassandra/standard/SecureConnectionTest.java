@@ -23,6 +23,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 
+import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
@@ -30,6 +31,7 @@ import io.kestra.core.runners.RunContextFactory;
 import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -84,6 +86,29 @@ class SecureConnectionTest {
             .build();
 
         assertThat(handshake(configuredSslContext(secureConnection), serverSslContext("server.p12", "server-truststore.p12"), true), is(true));
+    }
+
+    @Test
+    void missingTruststoreNamesTheField() {
+        var secureConnection = CassandraDbSession.SecureConnection.builder()
+            .keystorePath(Property.ofValue(store("client.p12")))
+            .keystorePassword(Property.ofValue(PASSWORD))
+            .build();
+
+        var exception = assertThrows(IllegalVariableEvaluationException.class, () -> configuredSslContext(secureConnection));
+
+        assertThat(exception.getMessage(), containsString("secureConnection.truststorePath is missing or empty"));
+    }
+
+    @Test
+    void blankTruststoreNamesTheField() {
+        var secureConnection = CassandraDbSession.SecureConnection.builder()
+            .truststorePath(Property.ofValue(" "))
+            .build();
+
+        var exception = assertThrows(IllegalVariableEvaluationException.class, () -> configuredSslContext(secureConnection));
+
+        assertThat(exception.getMessage(), containsString("secureConnection.truststorePath is missing or empty"));
     }
 
     private SSLContext configuredSslContext(CassandraDbSession.SecureConnection secureConnection) throws Exception {
