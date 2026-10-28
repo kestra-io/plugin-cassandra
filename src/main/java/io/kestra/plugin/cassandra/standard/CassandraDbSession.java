@@ -1,13 +1,17 @@
 package io.kestra.plugin.cassandra.standard;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import com.datastax.oss.driver.api.core.CqlSession;
@@ -151,7 +155,9 @@ public class CassandraDbSession {
     @Builder
     public static class SecureConnection {
         @Schema(
-            title = "Path to truststore file (.crt)"
+            title = "Path to truststore file (JKS or PKCS12)",
+            description = """
+                Required when `secureConnection` is set. The truststore holds the CA certificate that signed the server's certificate."""
         )
         @PluginProperty(group = "advanced")
         private Property<String> truststorePath;
@@ -163,7 +169,9 @@ public class CassandraDbSession {
         private Property<String> truststorePassword;
 
         @Schema(
-            title = "Path to keystore file (*.jks)"
+            title = "Path to keystore file (JKS or PKCS12)",
+            description = """
+                Only needed when the server requires client certificates (mutual TLS)."""
         )
         @PluginProperty(group = "advanced")
         private Property<String> keystorePath;
@@ -175,39 +183,54 @@ public class CassandraDbSession {
         private Property<String> keystorePassword;
 
         void configure(CqlSessionBuilder builder, RunContext runContext) throws IllegalVariableEvaluationException {
+            var rTruststorePath = renderStorePath(runContext, "truststorePath", this.truststorePath);
+            var rKeystorePath = this.keystorePath == null ? null : renderStorePath(runContext, "keystorePath", this.keystorePath);
+
             try {
-                KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
-                try (FileInputStream truststoreFis = new FileInputStream(runContext.render(this.truststorePath).as(String.class).orElseThrow())) {
-
-                    if (this.truststorePassword != null) {
-                        truststore.load(truststoreFis, runContext.render(this.truststorePassword).as(String.class).orElseThrow().toCharArray());
-                    } else {
-                        truststore.load(truststoreFis, null);
-                    }
-                }
-
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                tmf.init(truststore);
-
-                KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-                try (FileInputStream keystoreFis = new FileInputStream(runContext.render(this.keystorePath).as(String.class).orElseThrow())) {
-                    if (this.keystorePassword != null) {
-                        keystore.load(keystoreFis, runContext.render(this.keystorePassword).as(String.class).orElseThrow().toCharArray());
-                    } else {
-                        keystore.load(keystoreFis, null);
-                    }
-                }
-
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                kmf.init(keystore, runContext.render(this.keystorePassword).as(String.class).orElseThrow().toCharArray());
-
-                SSLContext sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+                var sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(keyManagers(runContext, rKeystorePath), trustManagers(runContext, rTruststorePath), null);
 
                 builder.withSslContext(sslContext);
             } catch (Exception e) {
                 throw new IllegalVariableEvaluationException("Failed to configure SSL", e);
             }
+        }
+
+        private KeyManager[] keyManagers(RunContext runContext, String rKeystorePath) throws GeneralSecurityException, IOException, IllegalVariableEvaluationException {
+            if (rKeystorePath == null) {
+                return null;
+            }
+
+            var rKeystorePassword = renderPassword(runContext, this.keystorePassword);
+            var kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(loadStore(rKeystorePath, rKeystorePassword), rKeystorePassword);
+            return kmf.getKeyManagers();
+        }
+
+        private TrustManager[] trustManagers(RunContext runContext, String rTruststorePath) throws GeneralSecurityException, IOException, IllegalVariableEvaluationException {
+            var tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(loadStore(rTruststorePath, renderPassword(runContext, this.truststorePassword)));
+            return tmf.getTrustManagers();
+        }
+
+        private static String renderStorePath(RunContext runContext, String name, Property<String> path) throws IllegalVariableEvaluationException {
+            return runContext.render(path).as(String.class).filter(p -> !p.isBlank()).orElseThrow(
+                () -> new IllegalVariableEvaluationException(
+                    "secureConnection." + name + " is missing or empty. Set it to the path of a JKS or PKCS12 file on the worker."
+                )
+            );
+        }
+
+        private static char[] renderPassword(RunContext runContext, Property<String> password) throws IllegalVariableEvaluationException {
+            return runContext.render(password).as(String.class).map(String::toCharArray).orElse(null);
+        }
+
+        private static KeyStore loadStore(String path, char[] password) throws GeneralSecurityException, IOException {
+            var store = KeyStore.getInstance(KeyStore.getDefaultType());
+            try (var in = new FileInputStream(path)) {
+                store.load(in, password);
+            }
+            return store;
         }
     }
 }
