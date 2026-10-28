@@ -39,9 +39,9 @@ import lombok.experimental.SuperBuilder;
                       endpoints:
                         - hostname: localhost
                       secureConnection:
-                        truststorePath: path to .crt file
+                        truststorePath: /path/to/truststore.jks
                         truststorePassword: "{{ secret('TRUSTSTORE_PASSWORD') }}"
-                        keystorePath: path to .jks file
+                        keystorePath: /path/to/keystore.jks
                         keystorePassword: "{{ secret('KEYSTORE_PASSWORD') }}"
                       username: cassandra_user
                       password: "{{ secret('CASSANDRA_PASSWORD') }}"
