@@ -41,8 +41,8 @@ tasks.withType(JavaCompile) {
 // Remove once the Kestra platform bumps Jackson to 2.21.7 or later.
 configurations.all {
     resolutionStrategy {
-        force 'com.fasterxml.jackson.core:jackson-databind:2.21.7'
-        force 'com.fasterxml.jackson.core:jackson-core:2.21.7'
+        force 'com.fasterxml.jackson.core:jackson-databind:2.22.4'
+        force 'com.fasterxml.jackson.core:jackson-core:2.22.4'
     }
 }
 
