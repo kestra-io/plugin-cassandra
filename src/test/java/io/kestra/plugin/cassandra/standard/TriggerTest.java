@@ -4,17 +4,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import io.kestra.core.junit.annotations.EvaluateTrigger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import com.google.common.collect.ImmutableMap;
 
+import io.kestra.core.junit.annotations.EvaluateTrigger;
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.executions.Execution;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
+
 import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,7 +36,6 @@ public class TriggerTest {
         this.runContext = runContextFactory.of(ImmutableMap.of());
         testHelper.initServer(this.runContext);
     }
-
 
     @Test
     @EvaluateTrigger(flow = "flows/cassandra-listen.yml", triggerId = "watch")

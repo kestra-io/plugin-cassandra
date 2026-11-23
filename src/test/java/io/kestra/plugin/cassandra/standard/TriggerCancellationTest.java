@@ -434,6 +434,52 @@ class TriggerCancellationTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void emptyFetchOneReturnsEmptyAndDoesNotThrow(boolean astra) throws Exception {
+        var client = new TestSession(false, false, false);
+        client.rowCount = 0;
+        var trigger = trigger(client, astra, FetchType.FETCH_ONE);
+        var execution = evaluate(trigger);
+        assertTrue(execution.isEmpty());
+    }
+
+    @Test
+    void queryFetchOneEmptyReturnsNullRowAndZeroSize() throws Exception {
+        var output = runFetchOneQuery(0);
+
+        assertNull(output.getRow());
+        assertEquals(0L, output.getSize());
+    }
+
+    @Test
+    void queryFetchOneNonEmptyReturnsRowAndOneSize() throws Exception {
+        var output = runFetchOneQuery(1);
+
+        assertNotNull(output.getRow());
+        assertEquals("sample", output.getRow().get("id"));
+        assertEquals(1L, output.getSize());
+    }
+
+    private Query.Output runFetchOneQuery(int rowCount) throws Exception {
+        var client = new TestSession(false, false, false);
+        client.rowCount = rowCount;
+        var query = Query.builder()
+            .id("test-query")
+            .type(Query.class.getName())
+            .session(new CassandraDbSession() {
+                @Override
+                CqlSession connect(RunContext runContext) {
+                    return client.connect();
+                }
+            })
+            .cql(Property.ofValue("SELECT * FROM test.test_table"))
+            .fetchType(Property.ofValue(FetchType.FETCH_ONE))
+            .build();
+
+        return query.run(runContextFactory.of());
+    }
+
     private static void stopExecutor(ExecutorService executor) throws InterruptedException {
         executor.shutdownNow();
         assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
@@ -458,12 +504,20 @@ class TriggerCancellationTest {
     }
 
     private AbstractCQLTrigger trigger(TestSession client, boolean astra) {
-        return trigger(() -> client, astra);
+        return trigger(() -> client, astra, FetchType.FETCH);
+    }
+
+    private AbstractCQLTrigger trigger(TestSession client, boolean astra, FetchType fetchType) {
+        return trigger(() -> client, astra, fetchType);
     }
 
     private AbstractCQLTrigger trigger(Supplier<TestSession> clients, boolean astra) {
+        return trigger(clients, astra, FetchType.FETCH);
+    }
+
+    private AbstractCQLTrigger trigger(Supplier<TestSession> clients, boolean astra, FetchType fetchType) {
         if (astra) {
-            return TriggerTestSupport.trigger(() -> clients.get().connect());
+            return TriggerTestSupport.trigger(() -> clients.get().connect(), fetchType);
         }
         return Trigger.builder()
             .id("watch")
@@ -475,7 +529,7 @@ class TriggerCancellationTest {
                 }
             })
             .cql(Property.ofValue("SELECT * FROM test.test_table"))
-            .fetchType(Property.ofValue(FetchType.FETCH))
+            .fetchType(Property.ofValue(fetchType != null ? fetchType : FetchType.FETCH))
             .build();
     }
 
@@ -543,6 +597,7 @@ class TriggerCancellationTest {
             ResultSet result = proxy(ResultSet.class, (method, args) -> switch (method) {
                 case "getColumnDefinitions" -> columns;
                 case "getExecutionInfo" -> executionInfo;
+                case "one" -> rowCount > 0 ? row : null;
                 case "forEach" -> {
                     if (blockRows) {
                         pageStarted.countDown();

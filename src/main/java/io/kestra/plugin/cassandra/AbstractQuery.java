@@ -96,9 +96,17 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
             FetchType type = computeFetchType(runContext);
 
             switch (type) {
-                case FETCH_ONE -> outputBuilder
-                    .row(convertRow(rs.one(), columnDefinitions))
-                    .size(1L);
+                case FETCH_ONE -> {
+                    var row = rs.one();
+                    if (row != null) {
+                        outputBuilder
+                            .row(convertRow(row, columnDefinitions))
+                            .size(1L);
+                    } else {
+                        outputBuilder
+                            .size(0L);
+                    }
+                }
                 case STORE -> {
                     File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
                     try (var output = new BufferedWriter(new FileWriter(tempFile), FileSerde.BUFFER_SIZE)) {
@@ -155,6 +163,10 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
     }
 
     private Map<String, Object> convertRow(Row row, ColumnDefinitions columnDefinitions) {
+        if (row == null) {
+            return null;
+        }
+
         Map<String, Object> map = new LinkedHashMap<>();
 
         for (int index = 0; index < columnDefinitions.size(); index++) {
@@ -277,7 +289,9 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
 
         @Schema(
             title = "The size of the fetched rows",
-            description = "Only populated when fetchType is FETCH or STORE."
+            description = """
+                The number of fetched rows (1 or 0 for FETCH_ONE).
+                """
         )
         private final Long size;
 
