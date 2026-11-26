@@ -12,10 +12,6 @@ public final class TriggerTestSupport {
     private TriggerTestSupport() {
     }
 
-    public static Trigger trigger(Supplier<CqlSession> sessions) {
-        return trigger(sessions, FetchType.FETCH);
-    }
-
     public static Trigger trigger(Supplier<CqlSession> sessions, FetchType fetchType) {
         return Trigger.builder()
             .id("watch")
@@ -27,7 +23,7 @@ public final class TriggerTestSupport {
                 }
             })
             .cql(Property.ofValue("SELECT * FROM test.test_table"))
-            .fetchType(Property.ofValue(fetchType != null ? fetchType : FetchType.FETCH))
+            .fetchType(Property.ofValue(fetchType))
             .build();
     }
 }

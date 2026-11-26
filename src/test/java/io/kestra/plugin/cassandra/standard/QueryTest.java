@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,6 +30,7 @@ import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 @KestraTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -61,6 +63,7 @@ class QueryTest {
             .build();
         Query.Output queryOutput = query.run(runContext);
 
+        assertThat(queryOutput.getSize(), is(1L));
         assertThat(queryOutput.getRow().get("id"), is("1"));
         assertThat(queryOutput.getRow().get("name"), is("Dusan"));
         assertThat(queryOutput.getRow().get("c_ascii"), is("ascii"));
@@ -87,5 +90,24 @@ class QueryTest {
         assertThat(queryOutput.getRow().get("c_set"), is(Set.of(1, 2, 3)));
         assertThat(queryOutput.getRow().get("c_list"), is(List.of("a", "b", "c")));
         assertThat(queryOutput.getRow().get("c_tuple"), is(List.of(3, "hours")));
+    }
+
+    @Test
+    void fetchOneWithoutMatchingRowReturnsNoRow() throws Exception {
+        Query query = Query.builder()
+            .session(
+                CassandraDbSession.builder()
+                    .endpoints(List.of(CassandraDbSession.Endpoint.builder().hostname("localhost").build()))
+                    .localDatacenter(Property.ofValue("datacenter1"))
+                    .build()
+            )
+            .cql(Property.ofValue("SELECT * FROM test.test_table WHERE id = 'missing';"))
+            .fetchType(Property.ofValue(FetchType.FETCH_ONE))
+            .build();
+
+        Query.Output queryOutput = query.run(runContext);
+
+        assertThat(queryOutput.getRow(), is(nullValue()));
+        assertThat(queryOutput.getSize(), is(0L));
     }
 }

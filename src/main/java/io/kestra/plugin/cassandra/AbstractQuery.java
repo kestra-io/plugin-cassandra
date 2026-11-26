@@ -163,10 +163,6 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
     }
 
     private Map<String, Object> convertRow(Row row, ColumnDefinitions columnDefinitions) {
-        if (row == null) {
-            return null;
-        }
-
         Map<String, Object> map = new LinkedHashMap<>();
 
         for (int index = 0; index < columnDefinitions.size(); index++) {
@@ -271,7 +267,7 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
     public static class Output implements io.kestra.core.models.tasks.Output {
         @Schema(
             title = "Map containing the first row of fetched data",
-            description = "Only populated when fetchType is FETCH_ONE."
+            description = "Only populated when fetchType is FETCH_ONE and the query returns a row."
         )
         private final Map<String, Object> row;
 
@@ -290,7 +286,7 @@ public abstract class AbstractQuery extends Task implements RunnableTask<Abstrac
         @Schema(
             title = "The size of the fetched rows",
             description = """
-                The number of fetched rows (1 or 0 for FETCH_ONE).
+                Only populated when fetchType is FETCH, FETCH_ONE or STORE. For FETCH_ONE, 1 when a row is returned, 0 otherwise.
                 """
         )
         private final Long size;

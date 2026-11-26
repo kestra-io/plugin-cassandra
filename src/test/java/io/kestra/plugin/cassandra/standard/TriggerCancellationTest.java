@@ -439,45 +439,22 @@ class TriggerCancellationTest {
     void emptyFetchOneReturnsEmptyAndDoesNotThrow(boolean astra) throws Exception {
         var client = new TestSession(false, false, false);
         client.rowCount = 0;
-        var trigger = trigger(client, astra, FetchType.FETCH_ONE);
+        var trigger = trigger(() -> client, astra, FetchType.FETCH_ONE);
         var execution = evaluate(trigger);
         assertTrue(execution.isEmpty());
     }
 
-    @Test
-    void queryFetchOneEmptyReturnsNullRowAndZeroSize() throws Exception {
-        var output = runFetchOneQuery(0);
-
-        assertNull(output.getRow());
-        assertEquals(0L, output.getSize());
-    }
-
-    @Test
-    void queryFetchOneNonEmptyReturnsRowAndOneSize() throws Exception {
-        var output = runFetchOneQuery(1);
-
-        assertNotNull(output.getRow());
-        assertEquals("sample", output.getRow().get("id"));
-        assertEquals(1L, output.getSize());
-    }
-
-    private Query.Output runFetchOneQuery(int rowCount) throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void fetchOneCreatesExecutionWithTheRow(boolean astra) throws Exception {
         var client = new TestSession(false, false, false);
-        client.rowCount = rowCount;
-        var query = Query.builder()
-            .id("test-query")
-            .type(Query.class.getName())
-            .session(new CassandraDbSession() {
-                @Override
-                CqlSession connect(RunContext runContext) {
-                    return client.connect();
-                }
-            })
-            .cql(Property.ofValue("SELECT * FROM test.test_table"))
-            .fetchType(Property.ofValue(FetchType.FETCH_ONE))
-            .build();
+        client.rowCount = 1;
+        var trigger = trigger(() -> client, astra, FetchType.FETCH_ONE);
 
-        return query.run(runContextFactory.of());
+        var execution = evaluate(trigger).orElseThrow();
+
+        assertEquals(Map.of("id", "sample"), execution.getTrigger().getVariables().get("row"));
+        assertEquals(1L, execution.getTrigger().getVariables().get("size"));
     }
 
     private static void stopExecutor(ExecutorService executor) throws InterruptedException {
@@ -507,10 +484,6 @@ class TriggerCancellationTest {
         return trigger(() -> client, astra, FetchType.FETCH);
     }
 
-    private AbstractCQLTrigger trigger(TestSession client, boolean astra, FetchType fetchType) {
-        return trigger(() -> client, astra, fetchType);
-    }
-
     private AbstractCQLTrigger trigger(Supplier<TestSession> clients, boolean astra) {
         return trigger(clients, astra, FetchType.FETCH);
     }
@@ -529,7 +502,7 @@ class TriggerCancellationTest {
                 }
             })
             .cql(Property.ofValue("SELECT * FROM test.test_table"))
-            .fetchType(Property.ofValue(fetchType != null ? fetchType : FetchType.FETCH))
+            .fetchType(Property.ofValue(fetchType))
             .build();
     }
 
