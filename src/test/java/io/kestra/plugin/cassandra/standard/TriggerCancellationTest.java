@@ -434,6 +434,29 @@ class TriggerCancellationTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void emptyFetchOneReturnsEmptyAndDoesNotThrow(boolean astra) throws Exception {
+        var client = new TestSession(false, false, false);
+        client.rowCount = 0;
+        var trigger = trigger(() -> client, astra, FetchType.FETCH_ONE);
+        var execution = evaluate(trigger);
+        assertTrue(execution.isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void fetchOneCreatesExecutionWithTheRow(boolean astra) throws Exception {
+        var client = new TestSession(false, false, false);
+        client.rowCount = 1;
+        var trigger = trigger(() -> client, astra, FetchType.FETCH_ONE);
+
+        var execution = evaluate(trigger).orElseThrow();
+
+        assertEquals(Map.of("id", "sample"), execution.getTrigger().getVariables().get("row"));
+        assertEquals(1L, execution.getTrigger().getVariables().get("size"));
+    }
+
     private static void stopExecutor(ExecutorService executor) throws InterruptedException {
         executor.shutdownNow();
         assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
@@ -458,12 +481,16 @@ class TriggerCancellationTest {
     }
 
     private AbstractCQLTrigger trigger(TestSession client, boolean astra) {
-        return trigger(() -> client, astra);
+        return trigger(() -> client, astra, FetchType.FETCH);
     }
 
     private AbstractCQLTrigger trigger(Supplier<TestSession> clients, boolean astra) {
+        return trigger(clients, astra, FetchType.FETCH);
+    }
+
+    private AbstractCQLTrigger trigger(Supplier<TestSession> clients, boolean astra, FetchType fetchType) {
         if (astra) {
-            return TriggerTestSupport.trigger(() -> clients.get().connect());
+            return TriggerTestSupport.trigger(() -> clients.get().connect(), fetchType);
         }
         return Trigger.builder()
             .id("watch")
@@ -475,7 +502,7 @@ class TriggerCancellationTest {
                 }
             })
             .cql(Property.ofValue("SELECT * FROM test.test_table"))
-            .fetchType(Property.ofValue(FetchType.FETCH))
+            .fetchType(Property.ofValue(fetchType))
             .build();
     }
 
@@ -543,6 +570,7 @@ class TriggerCancellationTest {
             ResultSet result = proxy(ResultSet.class, (method, args) -> switch (method) {
                 case "getColumnDefinitions" -> columns;
                 case "getExecutionInfo" -> executionInfo;
+                case "one" -> rowCount > 0 ? row : null;
                 case "forEach" -> {
                     if (blockRows) {
                         pageStarted.countDown();
